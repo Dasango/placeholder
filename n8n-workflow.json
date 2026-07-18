@@ -1,0 +1,66 @@
+{
+  "name": "GitHub Activity → Relay",
+  "nodes": [
+    {
+      "id": "webhook-trigger",
+      "name": "GitHub Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "webhookId": "github-activity",
+      "parameters": {
+        "path": "github-webhook",
+        "httpMethod": "POST",
+        "responseMode": "lastNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "http-relay",
+      "name": "Forward to Relay",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [450, 300],
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:3001/event",
+        "authentication": "none",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "event",
+              "value": "={{ $json.headers['x-github-event'] || 'unknown' }}"
+            },
+            {
+              "name": "repo",
+              "value": "={{ $json.body.repository?.full_name || 'unknown' }}"
+            },
+            {
+              "name": "action",
+              "value": "={{ $json.body.action || '' }}"
+            },
+            {
+              "name": "actor",
+              "value": "={{ $json.body.sender?.login || 'unknown' }}"
+            },
+            {
+              "name": "timestamp",
+              "value": "={{ Date.now() }}"
+            }
+          ]
+        },
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "GitHub Webhook": {
+      "main": [[ { "node": "Forward to Relay", "type": "main", "index": 0 } ]]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "tags": [],
+  "pinData": {}
+}
