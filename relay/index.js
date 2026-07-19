@@ -1,3 +1,5 @@
+// @ts-check
+
 import http from 'http';
 import { WebSocketServer } from 'ws';
 import express from 'express';
@@ -8,39 +10,36 @@ const wss = new WebSocketServer({ server });
 
 
 app.use(express.json());
-app.use((err, req, res, next) => {
-  if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
-    return res.status(400).json({ message: 'Error: El formato del JSON es inválido' });
-  }
-  next();
-});
 
 app.get('/', (req, res) => {
+  console.log('[GET] Evento recibido:', req.body);
   res.send('Servidor Express activo');
 });
 app.post('/event', (req, res) => {
+  console.log('[POST] Evento recibido:', req.body);
   for (const client of clients) {
-    res.json({ message: 'Evento recibido', data: eventData });
+    client.send(JSON.stringify(req.body));
   }
+  res.json({ message: 'Evento recibido', ok: true })
 });
 
 const clients = new Set();
 
 wss.on('connection', (ws) => {
-  console.log('Cliente conectado');
+  console.log('[WebSocket] Cliente conectado');
   clients.add(ws);
 
   ws.on('message', (message) => {
-    console.log(`Mensaje recibido: ${message}`);
-    ws.send(`Respuesta del servidor: ${message}`);
+    console.log(`[WebSocket] Mensaje recibido: ${message}`);
+    ws.send(`[WebSocket] Respuesta del servidor: ${message}`);
   });
 
   ws.on('close', () => {
-    console.log('Cliente desconectado');
+    console.log('[WebSocket] Cliente desconectado');
     clients.delete(ws);
   });
 });
 
 server.listen(3001, () => {
-  console.log('Servidor escuchando en el puerto 3001');
+  console.log('[HTTP] Servidor escuchando en el puerto 3001');
 });
