@@ -29,19 +29,29 @@ Tu proyecto viene con **NativeWind** instalado, lo cual es increíble porque pue
 
 ---
 
-## 📝 Ejercicio Práctico
-Tu tarea es modificar el código de la clase (o crear uno nuevo) para diseñar una **Tarjeta de Perfil de Usuario**.
-Debe contener:
-1.  Un contenedor principal con un borde y sombra elegante.
-2.  Un título (nombre del usuario).
-3.  Una descripción breve de su biografía.
-4.  Un campo de texto (`TextInput`) para dejarle un mensaje o comentario.
-5.  Un botón (`TouchableOpacity`) de "Enviar Mensaje" que al presionarlo llame a `Alert.alert("Mensaje enviado", "Tu mensaje ha sido enviado con éxito")`.
+## 📝 Ejercicio Práctico y Reto
+
+Tu tarea es diseñar una **Tarjeta de Perfil de Usuario**. No debe ser una simple copia del ejemplo; debe incorporar el siguiente **Mini Concepto Extra** como un desafío personal.
+
+### 💡 Mini Concepto Extra: El Componente `Image`
+Para mostrar imágenes en React Native, usamos el componente `<Image>` de `'react-native'`.
+*   **Imágenes locales**: `<Image source={require('./ruta/imagen.png')} />`
+*   **Imágenes de internet (Network)**: `<Image source={{ uri: 'https://ejemplo.com/foto.jpg' }} />`
+
+> [!IMPORTANT]
+> **El gran "Gotcha" de React Native**: A diferencia del desarrollo web, si cargas una imagen de internet, **debes darle dimensiones explícitas (ancho y alto)** usando clases de Tailwind (como `w-16 h-16`) o estilos inline. Si no lo haces, la imagen se renderizará con tamaño 0x0 y será totalmente invisible.
+
+---
+
+### 🏆 El Reto de la Clase 1:
+1.  Diseña la **Tarjeta de Perfil de Usuario** con un contenedor, título, biografía, input de texto y botón con la alerta.
+2.  **Agrega una Foto de Perfil (Avatar)** usando el componente `<Image>` y un enlace de internet (puedes usar un avatar de prueba como `https://avatar.iran.liara.run/public/boy`).
+3.  Estiliza la foto para que sea redonda (`rounded-full`) y colócala de manera armoniosa en tu tarjeta (por ejemplo, alineada al lado del nombre o centrada en la parte superior).
+4.  **Crea una cabecera decorativa**: Pon un contenedor de fondo con un gradiente o color sólido que sirva como "portada" y haz que el avatar sobresalga ligeramente sobre él usando márgenes negativos (ej. `-mt-8` o similar).
 
 ---
 
 ## 🔗 Código de Ejemplo
-El código de ejemplo para esta clase está guardado en el archivo físico:
+El código de ejemplo básico para esta clase está guardado en el archivo físico:
 [curso_react_native/ejemplos/Clase1_Basicos.tsx](file:///C:/Users/Desk/git/multiStack/Placeholdername/curso_react_native/ejemplos/Clase1_Basicos.tsx)
 
-Copia todo su contenido y pégalo en tu archivo [app/app/index.tsx](file:///C:/Users/Desk/git/multiStack/Placeholdername/app/app/index.tsx) para probarlo en tiempo real.
