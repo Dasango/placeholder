@@ -73,7 +73,7 @@ export default function Clase1Basicos() {
         {/* 📍 INICIA TU CÓDIGO AQUÍ (Escribe tu Tarjeta de Perfil de Usuario aquí) */}
         
         <View className="bg-[#161b22] border border-gray-800 rounded-xl overflow-hidden">
-          <View className="h-8 bg-emerald-500"/>
+          <View className="h-8 bg-emerald-500 rounded-t-xl rounded-b-none"/>
             <View className="p-5 mb-6">
               <View className="flex-row items-center mb-1 -mt-10">
                 <Image source={{ uri: 'https://i.pravatar.cc/100' }} className="w-12 h-12 rounded-full mr-4" />
