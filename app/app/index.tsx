@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -57,6 +57,16 @@ export default function Clase1Basicos() {
     Alert.alert("Mensaje enviado", "Tu mensaje ha sido enviado.");
   };
 
+  const [tiempoActivo, setTiempoActivo] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTiempoActivo((prev) => prev + 1);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   const [siguiendo, setSiguiendo] = useState(false);
   const [love, setLove] = useState(false);
   const [loveCount, setLoveCount] = useState(0);
@@ -81,7 +91,6 @@ export default function Clase1Basicos() {
 
       <View className="mt-6 mb-12 border-t-2 border-dashed border-gray-700 pt-8">
         {/* 📍 INICIA TU CÓDIGO AQUÍ (Escribe tu Tarjeta de Perfil de Usuario aquí) */}
-
         <View className="bg-[#161b22] border border-gray-800 rounded-xl overflow-hidden">
           <View className="h-8 bg-emerald-500 rounded-t-xl rounded-b-none" />
           <View className="p-5 mb-6">
@@ -98,7 +107,15 @@ export default function Clase1Basicos() {
                 Desarrollador de software
               </Text>
             </View>
-            <View className="flex-row items-center gap-2 my-2">
+            <View className="my-2">
+              <Text
+                className="text-gray-400 text-sm"
+                onPress={() => setTiempoActivo(0)}
+              >
+                Activo hace: {tiempoActivo} segundos
+              </Text>
+            </View>
+            <View className="flex-row items-center gap-5 my-2">
               <Button
                 onPress={() => setSiguiendo(!siguiendo)}
                 style={siguiendo ? "dark" : "light"}

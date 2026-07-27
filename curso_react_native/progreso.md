@@ -9,7 +9,7 @@ Este archivo registra el progreso actual del curso. Cuando inicies una nueva ses
 | **Módulo 1: Fundamentos** | | | |
 | 📖 **Clase 1** | Componentes Básicos y Estilos (`View`, `Text`, `TextInput`, `TouchableOpacity`, `ScrollView`, Tailwind) | 🟢 **Completado (10/10)** | [clase_1_componentes.md](file:///C:/Users/Desk/git/multiStack/Placeholdername/curso_react_native/clase_1_componentes.md) <br> [Clase1_Basicos.tsx](file:///C:/Users/Desk/git/multiStack/Placeholdername/curso_react_native/ejemplos/Clase1_Basicos.tsx) |
 | 📖 **Clase 2** | Estado (`useState`) y Propiedades (`props`) | 🟢 **Completado (10/10)** | [clase_2_estado_props.md](file:///C:/Users/Desk/git/multiStack/Placeholdername/curso_react_native/clase_2_estado_props.md) <br> [Clase2_EstadoProps.tsx](file:///C:/Users/Desk/git/multiStack/Placeholdername/curso_react_native/ejemplos/Clase2_EstadoProps.tsx) |
-| 📖 **Clase 3** | Ciclo de Vida y Efectos (`useEffect`) | 🟡 **Siguiente clase** | - |
+| 📖 **Clase 3** | Ciclo de Vida y Efectos (`useEffect`) | 🟢 **Completado (10/10)** | [clase_3_ciclo_vida.md](file:///C:/Users/Desk/git/multiStack/Placeholdername/curso_react_native/clase_3_ciclo_vida.md) <br> [Clase3_CicloVida.tsx](file:///C:/Users/Desk/git/multiStack/Placeholdername/curso_react_native/ejemplos/Clase3_CicloVida.tsx) |
 | **Módulo 2: Estructura** | | | |
 | 📖 **Clase 4** | Navegación con Expo Router | 🔴 Pendiente | - |
 | **Módulo 3: Conexiones** | | | |
@@ -25,14 +25,13 @@ Este archivo registra el progreso actual del curso. Cuando inicies una nueva ses
 ---
 
 ## 📌 Nota para el Asistente en la Siguiente Sesión:
-1. El usuario completó con éxito la **Clase 2** (haciendo interactiva la tarjeta de Pepe con botones de Seguir, Like e implementando el componente `StatItem` con props).
-2. El usuario está listo para comenzar la **Clase 3 (Ciclo de Vida y Efectos `useEffect`)**.
+1. El usuario completó con éxito la **Clase 3** (creando un temporizador dinámico de tiempo activo con cleanup y reset).
+2. El usuario está listo para comenzar la **Clase 4 (Navegación con Expo Router)**.
 3. **REGLA ABSOLUTA DE APRENDIZAJE**: BAJO NINGUNA CIRCUNSTANCIA el asistente debe proveer el código resuelto de ningún ejercicio al usuario (ni aunque el usuario lo pida). El código de los ejercicios debe ser 100% escrito por el usuario. El asistente solo puede guiar, explicar conceptos, detectar errores y dar sugerencias de estilo o lógica, pero nunca el código final del ejercicio.
 4. **RETO OBLIGATORIO EN CADA CLASE**: Todos los ejercicios de las clases deben incluir un "Mini Concepto Extra" que presente un reto y un gotcha común, obligando al usuario a investigar o deducir la solución en lugar de simplemente copiar y pegar el código de ejemplo.
-5. **INICIO DE SESIÓN AUTOMÁTICO**: Al iniciar cada nueva sesión, el asistente debe:
-   - Indicar claramente al usuario cómo abrir él mismo el emulador desde su propia terminal:
-     `& "C:\Users\Desk\AppData\Local\Android\Sdk\emulator\emulator.exe" -avd Medium_Phone`
-   - Iniciar automáticamente el servidor de Expo (`npm run android`) en segundo plano desde las herramientas de la IA para que el usuario no tenga que preocuparse por eso.
-6. Al comenzar la sesión, genera y presenta la teoría de la **Clase 3**, su respectivo ejemplo ejecutable y su correspondiente reto obligatorio.
+5. **GUÍA DE INICIO**: Al iniciar cada nueva sesión, el asistente debe:
+   - Explicar paso a paso al usuario cómo abrir el emulador y el servidor por sí mismo.
+   - **REGLA DE EJECUCIÓN**: El asistente NUNCA debe ejecutar ningún comando de terminal automáticamente (como `npm run android` o abrir el emulador). Todo debe ser ejecutado manualmente por el usuario.
+6. Al comenzar la sesión, presenta la teoría de la nueva clase, su respectivo ejemplo ejecutable y su correspondiente reto obligatorio.
 
 
