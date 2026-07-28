@@ -194,6 +194,13 @@ export default function Clase1Basicos() {
             </TouchableOpacity>
           </View>
         </View>
+        <View className="my-2">
+          <Button
+            titulo=" Ver más usuarios"
+            onPress={() => router.push("/usuarios")}
+            style="line"
+          />
+        </View>
       </View>
     </ScrollView>
   );
