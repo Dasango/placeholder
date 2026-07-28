@@ -9,6 +9,7 @@ import {
   Image,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 
 type ButtonStyleType = "dark" | "light" | "line";
 
@@ -20,11 +21,11 @@ interface ButtonProps {
 
 const styles: Record<ButtonStyleType, { container: string; text: string }> = {
   dark: {
-    container: "bg-[#252525] p-3 rounded-lg",
+    container: "bg-[#252525] p-3 rounded-lg border-2 border-transparent",
     text: "text-white font-bold",
   },
   light: {
-    container: "bg-emerald-500 p-3 rounded-lg",
+    container: "bg-emerald-500 p-3 rounded-lg border-2 border-transparent",
     text: "text-black font-bold",
   },
   line: {
@@ -52,6 +53,23 @@ function StatItem({ label, value }: { label: string; value: number }) {
   );
 }
 
+export interface DetalleRouteParams {
+  nombre: string;
+  rol: string;
+  tiempoActivo: string;
+  siguiendo: string;
+  likes: string;
+  [key: string]: string | string[] | undefined;
+}
+
+export interface DetalleModel {
+  nombre: string;
+  rol: string;
+  tiempoActivo: number;
+  siguiendo: boolean;
+  likes: number;
+}
+
 export default function Clase1Basicos() {
   const handlePressEjercicio = () => {
     Alert.alert("Mensaje enviado", "Tu mensaje ha sido enviado.");
@@ -72,13 +90,24 @@ export default function Clase1Basicos() {
   const [loveCount, setLoveCount] = useState(0);
 
   const handleLovePress = () => {
-    setLove(!love);
-    if (!love) {
-      setLoveCount(loveCount + 1);
-    }
-    setTimeout(() => {
-      setLove(false);
-    }, 100);
+    setLove((prevLove) => {
+      const nextLove = !prevLove;
+      setLoveCount((prevCount) => (nextLove ? prevCount + 1 : prevCount - 1));
+      return nextLove;
+    });
+  };
+
+  const handleVerPress = (data: DetalleModel) => {
+    router.push({
+      pathname: "/detalles",
+      params: {
+        nombre: data.nombre,
+        rol: data.rol,
+        tiempoActivo: data.tiempoActivo.toString(),
+        siguiendo: data.siguiendo.toString(),
+        likes: data.likes.toString(),
+      },
+    });
   };
 
   return (
@@ -120,6 +149,19 @@ export default function Clase1Basicos() {
                 onPress={() => setSiguiendo(!siguiendo)}
                 style={siguiendo ? "dark" : "light"}
                 titulo={siguiendo ? "Siguiendo" : "Seguir"}
+              />
+              <Button
+                onPress={() =>
+                  handleVerPress({
+                    nombre: "Pepe",
+                    rol: "Desarrollador de software",
+                    tiempoActivo: tiempoActivo,
+                    siguiendo: siguiendo,
+                    likes: loveCount,
+                  })
+                }
+                style="line"
+                titulo="Ver"
               />
               <Ionicons
                 onPress={() => handleLovePress()}
