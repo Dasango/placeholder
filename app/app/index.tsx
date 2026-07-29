@@ -72,7 +72,7 @@ export interface DetalleModel {
 
 export default function Clase1Basicos() {
   const handlePressEjercicio = () => {
-    Alert.alert("Mensaje enviado", "Tu mensaje ha sido enviado.");
+    router.push("/chat");
   };
 
   const [tiempoActivo, setTiempoActivo] = useState(0);
@@ -143,6 +143,9 @@ export default function Clase1Basicos() {
               >
                 Activo hace: {tiempoActivo} segundos
               </Text>
+              <Text className="text-gray-300 leading-relaxed my-2">
+                Me gusta gemini
+              </Text>
             </View>
             <View className="flex-row items-center gap-5 my-2">
               <Button
@@ -176,14 +179,6 @@ export default function Clase1Basicos() {
               <StatItem label="Siguiendo" value={80} />
             </View>
 
-            <Text className="text-gray-300 leading-relaxed my-2">
-              Me gusta gemini
-            </Text>
-            <TextInput
-              placeholder="Escribe tu mensaje aquí..."
-              placeholderTextColor="#6e7681"
-              className="bg-[#0d1117] border border-gray-800 text-white rounded-lg px-4 py-3 mt-2"
-            />
             <TouchableOpacity
               className="bg-emerald-500 rounded-lg py-3 items-center justify-center mt-4"
               onPress={handlePressEjercicio}
