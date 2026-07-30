@@ -189,10 +189,15 @@ export default function Clase1Basicos() {
             </TouchableOpacity>
           </View>
         </View>
-        <View className="my-2">
+        <View className="my-2 gap-2">
           <Button
             titulo=" Ver más usuarios"
             onPress={() => router.push("/usuarios")}
+            style="line"
+          />
+          <Button
+            titulo="Radar"
+            onPress={() => router.push("/radar")}
             style="line"
           />
         </View>

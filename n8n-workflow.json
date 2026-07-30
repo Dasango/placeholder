@@ -1,5 +1,83 @@
 {
-  "name": "GitHub Activity Radar",
-  "nodes": [],
-  "connections": {}
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "github-webhook",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -192,
+        0
+      ],
+      "id": "be416ad8-1bf9-4d4a-b5b6-45220d989fe6",
+      "name": "Webhook",
+      "webhookId": "f37f00a3-016b-43a1-9a88-904f80d2eb8d"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:3001/event",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "event",
+              "value": "={{ $json.headers['x-github-event'] }}"
+            },
+            {
+              "name": "repo",
+              "value": "={{ $json.body.repository.full_name }}"
+            },
+            {
+              "name": "actor",
+              "value": "={{ $json.body.sender.login }}"
+            },
+            {
+              "name": "timestamp",
+              "value": "={{ Date.now() }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        16,
+        0
+      ],
+      "id": "8edf2885-fd59-4311-81f4-44b5908a0a88",
+      "name": "HTTP Request"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "48031a24-5dce-49ff-a4dc-3e2f3037e100",
+  "meta": {
+    "instanceId": "923db07cd4c9ca6fb0f3c907af115c67f9c3a22ed9c310bab7739bb018b68fd7"
+  },
+  "nodeGroups": [],
+  "id": "F8CyvVdSymzrtHER",
+  "tags": []
 }
