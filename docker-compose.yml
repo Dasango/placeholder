@@ -5,6 +5,15 @@ services:
       - "5678:5678"
     volumes:
       - n8n_data:/home/node/.n8n
+    depends_on:
+      - relay
+
+  relay:
+    build:
+      context: ./relay
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
 
 volumes:
   n8n_data:
