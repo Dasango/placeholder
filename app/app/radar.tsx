@@ -4,10 +4,9 @@ import {
   Text,
   FlatList,
   TouchableOpacity,
-  StyleSheet,
   ActivityIndicator,
-  SafeAreaView,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 // Definición de la estructura de un evento de GitHub procesado por n8n
 interface GithubEvent {
@@ -17,6 +16,54 @@ interface GithubEvent {
   actor: string;
   timestamp: number;
 }
+
+// Configuración visual por tipo de evento (clases Tailwind en vez de colores sueltos)
+const CONFIG_EVENTOS: Record<
+  string,
+  {
+    emoji: string;
+    titulo: string;
+    borderClass: string;
+    bgClass: string;
+    textClass: string;
+  }
+> = {
+  star: {
+    emoji: "⭐",
+    titulo: "New Star!",
+    borderClass: "border-amber-400",
+    bgClass: "bg-amber-950",
+    textClass: "text-amber-400",
+  },
+  issue: {
+    emoji: "🐛",
+    titulo: "New Issue",
+    borderClass: "border-red-500",
+    bgClass: "bg-red-950",
+    textClass: "text-red-500",
+  },
+  push: {
+    emoji: "🚀",
+    titulo: "New Commit",
+    borderClass: "border-blue-500",
+    bgClass: "bg-blue-950",
+    textClass: "text-blue-500",
+  },
+  pull_request: {
+    emoji: "🔀",
+    titulo: "Pull Request",
+    borderClass: "border-emerald-500",
+    bgClass: "bg-emerald-950",
+    textClass: "text-emerald-500",
+  },
+  default: {
+    emoji: "❓",
+    titulo: "Evento GitHub",
+    borderClass: "border-gray-400",
+    bgClass: "bg-gray-800",
+    textClass: "text-gray-400",
+  },
+};
 
 export default function Clase7WebhooksEjemplo() {
   // --- Estados de Conexión y Datos ---
@@ -89,7 +136,6 @@ export default function Clase7WebhooksEjemplo() {
   }, []);
 
   // --- Lógica de Filtros y Métricas (Mini Concepto Extra) ---
-  // Calculamos los contadores usando useMemo para optimizar rendimiento ante re-renders
   const metricas = useMemo(() => {
     return eventos.reduce(
       (acumulador, current) => {
@@ -109,46 +155,17 @@ export default function Clase7WebhooksEjemplo() {
     return eventos.filter((e) => e.event === filtroSeleccionado);
   }, [eventos, filtroSeleccionado]);
 
-  // --- Mapeo Visual Dinámico (Gotcha de Emojis y Colores) ---
-  const obtenerConfiguracionEvento = (tipo: string) => {
-    switch (tipo) {
-      case "star":
-        return {
-          emoji: "⭐",
-          titulo: "New Star!",
-          color: "#fbbf24",
-          bg: "#2d2206",
-        };
-      case "issue":
-        return {
-          emoji: "🐛",
-          titulo: "New Issue",
-          color: "#ef4444",
-          bg: "#2d0606",
-        };
-      case "push":
-        return {
-          emoji: "🚀",
-          titulo: "New Commit",
-          color: "#3b82f6",
-          bg: "#061c2d",
-        };
-      case "pull_request":
-        return {
-          emoji: "🔀",
-          titulo: "Pull Request",
-          color: "#10b981",
-          bg: "#062d18",
-        };
-      default:
-        return {
-          emoji: "❓",
-          titulo: "Evento GitHub",
-          color: "#9ca3af",
-          bg: "#1f2937",
-        };
-    }
-  };
+  // --- Mapeo Visual Dinámico ---
+  const obtenerConfiguracionEvento = (tipo: string) =>
+    CONFIG_EVENTOS[tipo] ?? CONFIG_EVENTOS.default;
+
+  // --- Color del indicador de estado de conexión ---
+  const dotClass =
+    estadoConexion === "CONECTADO"
+      ? "bg-emerald-500"
+      : estadoConexion === "CONECTANDO"
+        ? "bg-amber-400"
+        : "bg-red-500";
 
   // --- Renderizado de Items ---
   const renderItem = ({ item }: { item: GithubEvent }) => {
@@ -157,76 +174,67 @@ export default function Clase7WebhooksEjemplo() {
 
     return (
       <View
-        style={[
-          styles.card,
-          { borderColor: config.color, backgroundColor: config.bg },
-        ]}
+        className={`rounded-xl border p-3 mb-3 ${config.borderClass} ${config.bgClass}`}
       >
-        <View style={styles.cardHeader}>
-          <Text style={styles.cardEmoji}>{config.emoji}</Text>
-          <Text style={[styles.cardTitle, { color: config.color }]}>
+        <View className="flex-row items-center mb-1.5">
+          <Text className="text-xl mr-2">{config.emoji}</Text>
+          <Text className={`flex-1 text-base font-bold ${config.textClass}`}>
             {config.titulo}
           </Text>
-          <Text style={styles.cardTime}>{fechaFormat}</Text>
+          <Text className="text-xs text-gray-400">{fechaFormat}</Text>
         </View>
-        <Text style={styles.cardDetails}>
-          <Text style={styles.boldText}>{item.actor}</Text> actuó en el
-          repositorio <Text style={styles.boldText}>{item.repo}</Text>
+        <Text className="text-sm text-gray-200">
+          <Text className="font-bold">{item.actor}</Text> actuó en el
+          repositorio <Text className="font-bold">{item.repo}</Text>
         </Text>
       </View>
     );
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView className="flex-1 bg-neutral-950">
       {/* Header y Conexión */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>GitHub Live Radar</Text>
-        <View style={styles.estadoContainer}>
-          <View
-            style={[
-              styles.estadoDot,
-              {
-                backgroundColor:
-                  estadoConexion === "CONECTADO"
-                    ? "#10b981"
-                    : estadoConexion === "CONECTANDO"
-                      ? "#fbbf24"
-                      : "#ef4444",
-              },
-            ]}
-          />
-          <Text style={styles.estadoText}>{estadoConexion}</Text>
+      <View className="flex-row items-center justify-between px-4 py-3 border-b border-neutral-800">
+        <Text className="text-lg font-bold text-white">GitHub Live Radar</Text>
+        <View className="flex-row items-center">
+          <View className={`w-2.5 h-2.5 rounded-full mr-1.5 ${dotClass}`} />
+          <Text className="text-xs font-semibold text-gray-300">
+            {estadoConexion}
+          </Text>
         </View>
       </View>
 
       {/* Panel de Métricas */}
-      <View style={styles.metricasPanel}>
-        <Text style={styles.metricasLabel}>Métricas de Sesión:</Text>
-        <View style={styles.metricasList}>
-          <Text style={styles.metricaText}>⭐ {metricas.stars}</Text>
-          <Text style={styles.metricaText}>🐛 {metricas.issues}</Text>
-          <Text style={styles.metricaText}>🚀 {metricas.commits}</Text>
-          <Text style={styles.metricaText}>❓ {metricas.otros}</Text>
+      <View className="px-4 py-3 bg-neutral-900">
+        <Text className="text-xs text-gray-400 mb-1.5">
+          Métricas de Sesión:
+        </Text>
+        <View className="flex-row justify-between">
+          <Text className="text-sm text-gray-200">⭐ {metricas.stars}</Text>
+          <Text className="text-sm text-gray-200">🐛 {metricas.issues}</Text>
+          <Text className="text-sm text-gray-200">🚀 {metricas.commits}</Text>
+          <Text className="text-sm text-gray-200">❓ {metricas.otros}</Text>
         </View>
       </View>
 
       {/* Filtros */}
-      <View style={styles.filtroContainer}>
+      <View className="flex-row px-4 py-2.5 gap-2">
         {["todos", "star", "issue", "push"].map((filtro) => (
           <TouchableOpacity
             key={filtro}
-            style={[
-              styles.filtroBtn,
-              filtroSeleccionado === filtro && styles.filtroBtnActivo,
-            ]}
             onPress={() => setFiltroSeleccionado(filtro)}
+            className={`px-3 py-1.5 rounded-full border border-neutral-700 ${
+              filtroSeleccionado === filtro
+                ? "bg-emerald-500 border-emerald-500"
+                : "bg-neutral-900"
+            }`}
           >
             <Text
-              style={[
-                styles.filtroBtnText,
-                filtroSeleccionado === filtro && styles.filtroBtnTextActivo,
-              ]}
+              className={`text-xs font-semibold ${
+                filtroSeleccionado === filtro
+                  ? "text-neutral-950"
+                  : "text-gray-300"
+              }`}
             >
               {filtro.toUpperCase()}
             </Text>
@@ -239,13 +247,13 @@ export default function Clase7WebhooksEjemplo() {
         data={eventosFiltrados}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
-        contentContainerStyle={styles.listContainer}
+        contentContainerStyle={{ padding: 16 }}
         ListEmptyComponent={
-          <View style={styles.emptyContainer}>
+          <View className="items-center justify-center py-10">
             {estadoConexion === "CONECTANDO" ? (
               <ActivityIndicator size="large" color="#10b981" />
             ) : (
-              <Text style={styles.emptyText}>
+              <Text className="text-sm text-gray-500">
                 Esperando eventos de GitHub...
               </Text>
             )}
@@ -255,132 +263,3 @@ export default function Clase7WebhooksEjemplo() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#0d1117", // Color oscuro de GitHub
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#21262d",
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#c9d1d9",
-  },
-  estadoContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  estadoDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    marginRight: 8,
-  },
-  estadoText: {
-    fontSize: 12,
-    color: "#8b949e",
-    fontWeight: "600",
-  },
-  metricasPanel: {
-    backgroundColor: "#161b22",
-    margin: 16,
-    padding: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#21262d",
-  },
-  metricasLabel: {
-    color: "#8b949e",
-    fontSize: 12,
-    marginBottom: 6,
-    fontWeight: "bold",
-  },
-  metricasList: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-  },
-  metricaText: {
-    color: "#c9d1d9",
-    fontSize: 14,
-    fontWeight: "bold",
-  },
-  filtroContainer: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    paddingHorizontal: 16,
-    marginBottom: 8,
-  },
-  filtroBtn: {
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: "#30363d",
-    backgroundColor: "#161b22",
-  },
-  filtroBtnActivo: {
-    backgroundColor: "#21262d",
-    borderColor: "#8b949e",
-  },
-  filtroBtnText: {
-    color: "#8b949e",
-    fontSize: 11,
-    fontWeight: "600",
-  },
-  filtroBtnTextActivo: {
-    color: "#c9d1d9",
-  },
-  listContainer: {
-    padding: 16,
-  },
-  card: {
-    padding: 16,
-    borderRadius: 8,
-    borderWidth: 1,
-    marginBottom: 12,
-  },
-  cardHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  cardEmoji: {
-    fontSize: 18,
-    marginRight: 8,
-  },
-  cardTitle: {
-    fontWeight: "bold",
-    fontSize: 14,
-    flex: 1,
-  },
-  cardTime: {
-    fontSize: 12,
-    color: "#8b949e",
-  },
-  cardDetails: {
-    color: "#c9d1d9",
-    fontSize: 13,
-    lineHeight: 18,
-  },
-  boldText: {
-    fontWeight: "bold",
-    color: "#ffffff",
-  },
-  emptyContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 40,
-  },
-  emptyText: {
-    color: "#8b949e",
-    fontSize: 14,
-  },
-});
