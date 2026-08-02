@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   SafeAreaView
 } from 'react-native';
+import Constants from 'expo-constants';
 
 // Definición de la estructura de un evento de GitHub procesado por n8n
 interface GithubEvent {
@@ -24,9 +25,19 @@ export default function Clase7WebhooksEjemplo() {
   const [eventos, setEventos] = useState<GithubEvent[]>([]);
   const [filtroSeleccionado, setFiltroSeleccionado] = useState<string>('todos');
 
-  // Dirección del WebSocket (en producción se usa variables de entorno)
-  // IMPORTANTE: En Android Emulator usar 10.0.2.2 en lugar de localhost
-  const wsUrl = 'ws://10.0.2.2:3001'; 
+  // Dirección del WebSocket (se detecta automáticamente la IP de tu PC para que funcione en celular físico)
+  const getWsUrl = () => {
+    const hostUri = Constants.expoConfig?.hostUri;
+    if (hostUri) {
+      // Extrae la IP de la URL de Metro (por ejemplo, "192.168.1.100:8081" -> "192.168.1.100")
+      const ip = hostUri.split(':')[0];
+      return `ws://${ip}:3001`;
+    }
+    // Fallback: usar 10.0.2.2 para Android Emulator
+    return 'ws://10.0.2.2:3001';
+  };
+
+  const wsUrl = getWsUrl();
   const socketRef = useRef<WebSocket | null>(null);
 
   // --- Conectar al WebSocket Relay ---
@@ -34,6 +45,7 @@ export default function Clase7WebhooksEjemplo() {
     if (socketRef.current) return;
 
     setEstadoConexion('CONECTANDO');
+    console.log(`🔌 Intentando conectar a WebSocket en: ${wsUrl}`);
     const ws = new WebSocket(wsUrl);
     socketRef.current = ws;
 

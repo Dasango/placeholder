@@ -196,7 +196,7 @@ export default function Clase1Basicos() {
             style="line"
           />
           <Button
-            titulo="Radar"
+            titulo="Github Radar"
             onPress={() => router.push("/radar")}
             style="line"
           />
