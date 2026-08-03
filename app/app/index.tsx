@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { useUserStore } from "./store/userStore";
 
 type ButtonStyleType = "dark" | "light" | "line";
 
@@ -71,6 +72,8 @@ export interface DetalleModel {
 }
 
 export default function Clase1Basicos() {
+  const { username, profileImage } = useUserStore();
+
   const handlePressEjercicio = () => {
     router.push("/chat");
   };
@@ -125,12 +128,14 @@ export default function Clase1Basicos() {
           <View className="p-5 mb-6">
             <View className="flex-row items-center mb-1 -mt-10">
               <Image
-                source={{ uri: "https://i.pravatar.cc/100" }}
+                source={{ uri: profileImage }}
                 className="w-12 h-12 rounded-full mr-4"
               />
             </View>
             <View className="flex-row items-baseline gap-2 my-2">
-              <Text className="text-lg font-semibold text-white">Pepe</Text>
+              <Text className="text-lg font-semibold text-white">
+                {username}
+              </Text>
               <Text className="text-gray-400 text-sm">-</Text>
               <Text className="text-gray-400 text-sm">
                 Desarrollador de software
@@ -156,7 +161,7 @@ export default function Clase1Basicos() {
               <Button
                 onPress={() =>
                   handleVerPress({
-                    nombre: "Pepe",
+                    nombre: username,
                     rol: "Desarrollador de software",
                     tiempoActivo: tiempoActivo,
                     siguiendo: siguiendo,

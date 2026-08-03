@@ -12,7 +12,7 @@ import Constants from "expo-constants";
 // Definición de la estructura de un evento de GitHub procesado por n8n
 interface GithubEvent {
   id: string;
-  event: "star" | "issue" | "push" | "pull_request" | string;
+  event: "star" | "issues" | "push" | "pull_request" | string;
   repo: string;
   actor: string;
   timestamp: number;
@@ -36,7 +36,7 @@ const CONFIG_EVENTOS: Record<
     bgClass: "bg-amber-950",
     textClass: "text-amber-400",
   },
-  issue: {
+  issues: {
     emoji: "🐛",
     titulo: "New Issue",
     borderClass: "border-red-500",
@@ -152,7 +152,7 @@ export default function Clase7WebhooksEjemplo() {
     return eventos.reduce(
       (acumulador, current) => {
         if (current.event === "star") acumulador.stars += 1;
-        else if (current.event === "issue") acumulador.issues += 1;
+        else if (current.event === "issues") acumulador.issues += 1;
         else if (current.event === "push") acumulador.commits += 1;
         else acumulador.otros += 1;
         return acumulador;
@@ -231,7 +231,7 @@ export default function Clase7WebhooksEjemplo() {
 
       {/* Filtros */}
       <View className="flex-row px-4 py-2.5 gap-2">
-        {["todos", "star", "issue", "push"].map((filtro) => (
+        {["todos", "star", "issues", "push"].map((filtro) => (
           <TouchableOpacity
             key={filtro}
             onPress={() => setFiltroSeleccionado(filtro)}

@@ -2,6 +2,7 @@ import { Stack, useLocalSearchParams, router } from "expo-router";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { DetalleModel, DetalleRouteParams } from ".";
+import { useUserStore } from "./store/userStore";
 
 function DetailStat({
   label,
@@ -21,6 +22,8 @@ function DetailStat({
 export default function Detalles() {
   const routeParams = useLocalSearchParams() as unknown as DetalleRouteParams;
 
+  const { profileImage, username } = useUserStore();
+
   const perfil: DetalleModel = {
     nombre: routeParams.nombre || "",
     rol: routeParams.rol || "",
@@ -34,10 +37,7 @@ export default function Detalles() {
       <Stack.Screen options={{ title: `Perfil de ${perfil.nombre}` }} />
       <View className="flex-1 bg-[#252525] px-6 pt-16 items-center">
         <View className="w-28 h-28 rounded-full border-4 border-emerald-500 overflow-hidden mb-5">
-          <Image
-            source={{ uri: "https://i.pravatar.cc/200" }}
-            className="w-full h-full"
-          />
+          <Image source={{ uri: profileImage }} className="w-full h-full" />
         </View>
 
         {/* Nombre y rol */}
