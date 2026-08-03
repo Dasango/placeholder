@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { Card, Screen, useTheme } from "../components/Screen";
 
 interface Company {
   name: string;
@@ -32,6 +33,7 @@ export default function Usuarios() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const theme = useTheme();
 
   const fetchUsers = useCallback(async (isRefresh = false) => {
     if (isRefresh) {
@@ -73,19 +75,19 @@ export default function Usuarios() {
   // --- Estado: Loading ---
   if (loading) {
     return (
-      <View className="flex-1 items-center justify-center bg-[#252525]">
+      <Screen className="flex-1 items-center justify-center">
         <ActivityIndicator size="large" color="#10b981" />
-        <Text className="text-white mt-4 text-base">
+        <Text className={`mt-4 text-base ${theme.text}`}>
           Obteniendo usuarios...
         </Text>
-      </View>
+      </Screen>
     );
   }
 
   // --- Estado: Error ---
   if (error) {
     return (
-      <View className="flex-1 items-center justify-center bg-[#252525] px-6">
+      <Screen className="flex-1 items-center justify-center px-6">
         <View className="bg-[#3a1f1f] border border-red-500/40 rounded-2xl p-6 w-full items-center">
           <Text className="text-4xl mb-2">⚠️</Text>
           <Text className="text-red-400 font-bold text-lg mb-1">
@@ -101,21 +103,22 @@ export default function Usuarios() {
             </Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </Screen>
     );
   }
 
   // --- Estado: Éxito ---
   return (
-    <View className="flex-1 bg-[#252525] px-4 pt-16">
-      <Text className="text-white text-2xl font-bold mb-4">Usuarios</Text>
+    <Screen className="flex-1 px-4 pt-16">
+      <Text className={`text-2xl font-bold mb-4 ${theme.text}`}>Usuarios</Text>
 
       <TextInput
         value={search}
         onChangeText={setSearch}
         placeholder="Buscar por nombre..."
-        placeholderTextColor="#888"
-        className="bg-[#333] text-white rounded-xl px-4 py-3 mb-4"
+        placeholderTextColor={theme.placeholder}
+        className={`rounded-xl px-4 py-3 mb-4 ${theme.text}`}
+        style={{ backgroundColor: theme.surfaceAlt, color: theme.color }}
       />
 
       <FlatList
@@ -131,24 +134,26 @@ export default function Usuarios() {
         contentContainerStyle={{ paddingBottom: 24 }}
         ListEmptyComponent={
           <View className="items-center mt-10">
-            <Text className="text-gray-400 text-base text-center">
+            <Text className={`text-base text-center ${theme.textMuted}`}>
               No se encontraron usuarios con ese nombre
             </Text>
           </View>
         }
         renderItem={({ item }) => (
-          <View className="bg-[#333] rounded-2xl p-4 mb-3 border border-white/5">
-            <Text className="text-white font-bold text-base">{item.name}</Text>
+          <Card className="rounded-2xl p-4 mb-3">
+            <Text className={`font-bold text-base ${theme.text}`}>
+              {item.name}
+            </Text>
             <Text className="text-emerald-400 text-sm mb-1">
               @{item.username}
             </Text>
-            <Text className="text-gray-300 text-sm">{item.email}</Text>
-            <Text className="text-gray-400 text-xs mt-1">
+            <Text className={`text-sm ${theme.textSoft}`}>{item.email}</Text>
+            <Text className={`text-xs mt-1 ${theme.textMuted}`}>
               {item.company.name}
             </Text>
-          </View>
+          </Card>
         )}
       />
-    </View>
+    </Screen>
   );
 }

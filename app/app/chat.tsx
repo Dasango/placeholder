@@ -9,6 +9,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
+import { Card, Screen, useTheme } from "../components/Screen";
 
 interface Mensaje {
   id: string;
@@ -167,28 +168,30 @@ export default function Chat() {
     }
   };
 
+  const theme = useTheme();
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      className="flex-1 bg-[#0d1117]"
+      className="flex-1"
     >
-      <View className="flex-1 p-6 pt-12">
-        <View className="bg-[#161b22] border border-gray-800 rounded-2xl p-5 mb-4">
+      <Screen className="flex-1 p-6 pt-12">
+        <Card className="rounded-2xl p-5 mb-4">
           <View className="flex-row justify-between items-center mb-3">
-            <Text className="text-gray-300 text-sm font-semibold">
+            <Text className={`text-sm font-semibold ${theme.textSoft}`}>
               Estado del Servidor:
             </Text>
             <View className="flex-row items-center">
               <View
                 className={`w-3.5 h-3.5 rounded-full mr-2 ${obtenerColorEstado()}`}
               />
-              <Text className="text-white font-bold text-xs uppercase tracking-wider">
+              <Text className={`font-bold text-xs uppercase tracking-wider ${theme.text}`}>
                 {estadoConexion}
               </Text>
             </View>
           </View>
 
-          <Text className="text-gray-400 text-xs font-mono mb-4 break-all">
+          <Text className={`text-xs font-mono mb-4 break-all ${theme.textMuted}`}>
             URL: {urlSocket}
           </Text>
 
@@ -221,19 +224,19 @@ export default function Chat() {
               </Text>
             </TouchableOpacity>
           </View>
-        </View>
+        </Card>
 
-        <View className="flex-1 bg-[#161b22] border border-gray-800 rounded-2xl p-4 mb-4">
+        <Card className="flex-1 rounded-2xl p-4 mb-4">
           {estadoConexion === "CONECTANDO" && mensajes.length === 0 ? (
             <View className="flex-1 justify-center items-center">
               <ActivityIndicator size="small" color="#10b981" />
-              <Text className="text-gray-400 text-xs mt-3">
+              <Text className={`text-xs mt-3 ${theme.textMuted}`}>
                 Estableciendo conexión...
               </Text>
             </View>
           ) : mensajes.length === 0 ? (
             <View className="flex-1 justify-center items-center px-4">
-              <Text className="text-gray-500 text-center text-sm">
+              <Text className={`text-center text-sm ${theme.textMuted}`}>
                 No hay mensajes en esta sesión. Conéctate y envía un mensaje
                 para probar el eco.
               </Text>
@@ -255,11 +258,26 @@ export default function Chat() {
                       className={`max-w-[80%] rounded-2xl px-4 py-3 ${
                         esUsuario
                           ? "bg-emerald-600 rounded-tr-none"
-                          : "bg-gray-800 rounded-tl-none"
+                          : "rounded-tl-none"
                       }`}
+                      style={
+                        esUsuario
+                          ? undefined
+                          : { backgroundColor: theme.surfaceAlt }
+                      }
                     >
-                      <Text className="text-white text-sm">{item.texto}</Text>
-                      <Text className="text-gray-300 text-[10px] text-right mt-1 font-mono">
+                      <Text
+                        className={`text-sm ${
+                          esUsuario ? "text-white" : theme.text
+                        }`}
+                      >
+                        {item.texto}
+                      </Text>
+                      <Text
+                        className={`text-[10px] text-right mt-1 font-mono ${
+                          esUsuario ? "text-gray-200" : theme.textMuted
+                        }`}
+                      >
                         {item.fecha.toLocaleTimeString([], {
                           hour: "2-digit",
                           minute: "2-digit",
@@ -272,7 +290,7 @@ export default function Chat() {
               }}
             />
           )}
-        </View>
+        </Card>
 
         <View className="flex-row gap-3">
           <TextInput
@@ -283,9 +301,10 @@ export default function Chat() {
                 ? "Escribe un mensaje de prueba..."
                 : "Debes estar conectado..."
             }
-            placeholderTextColor="#6e7681"
+            placeholderTextColor={theme.placeholder}
             editable={estadoConexion === "CONECTADO"}
-            className="flex-1 bg-[#161b22] border border-gray-800 text-white rounded-xl px-4 py-3"
+            className={`flex-1 border ${theme.border} text-white rounded-xl px-4 py-3`}
+            style={{ backgroundColor: theme.surface, color: theme.color }}
           />
           <TouchableOpacity
             onPress={enviarMensaje}
@@ -299,7 +318,7 @@ export default function Chat() {
             <Text className="text-black font-bold text-sm">Enviar</Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </Screen>
     </KeyboardAvoidingView>
   );
 }

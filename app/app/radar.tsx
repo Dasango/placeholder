@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Constants from "expo-constants";
+import { Screen, useTheme } from "../components/Screen";
 
 // Definición de la estructura de un evento de GitHub procesado por n8n
 interface GithubEvent {
@@ -179,6 +180,8 @@ export default function Clase7WebhooksEjemplo() {
         ? "bg-amber-400"
         : "bg-red-500";
 
+  const theme = useTheme();
+
   // --- Renderizado de Items ---
   const renderItem = ({ item }: { item: GithubEvent }) => {
     const config = obtenerConfiguracionEvento(item.event);
@@ -204,74 +207,85 @@ export default function Clase7WebhooksEjemplo() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-neutral-950">
-      {/* Header y Conexión */}
-      <View className="flex-row items-center justify-between px-4 py-3 border-b border-neutral-800">
-        <Text className="text-lg font-bold text-white">GitHub Live Radar</Text>
-        <View className="flex-row items-center">
-          <View className={`w-2.5 h-2.5 rounded-full mr-1.5 ${dotClass}`} />
-          <Text className="text-xs font-semibold text-gray-300">
-            {estadoConexion}
+    <SafeAreaView className="flex-1">
+      <Screen className="flex-1">
+        {/* Header y Conexión */}
+        <View className={`flex-row items-center justify-between px-4 py-3 border-b ${theme.border}`}>
+          <Text className={`text-lg font-bold ${theme.text}`}>
+            GitHub Live Radar
           </Text>
-        </View>
-      </View>
-
-      {/* Panel de Métricas */}
-      <View className="px-4 py-3 bg-neutral-900">
-        <Text className="text-xs text-gray-400 mb-1.5">
-          Métricas de Sesión:
-        </Text>
-        <View className="flex-row justify-between">
-          <Text className="text-sm text-gray-200">⭐ {metricas.stars}</Text>
-          <Text className="text-sm text-gray-200">🐛 {metricas.issues}</Text>
-          <Text className="text-sm text-gray-200">🚀 {metricas.commits}</Text>
-          <Text className="text-sm text-gray-200">❓ {metricas.otros}</Text>
-        </View>
-      </View>
-
-      {/* Filtros */}
-      <View className="flex-row px-4 py-2.5 gap-2">
-        {["todos", "star", "issues", "push"].map((filtro) => (
-          <TouchableOpacity
-            key={filtro}
-            onPress={() => setFiltroSeleccionado(filtro)}
-            className={`px-3 py-1.5 rounded-full border border-neutral-700 ${
-              filtroSeleccionado === filtro
-                ? "bg-emerald-500 border-emerald-500"
-                : "bg-neutral-900"
-            }`}
-          >
-            <Text
-              className={`text-xs font-semibold ${
-                filtroSeleccionado === filtro
-                  ? "text-neutral-950"
-                  : "text-gray-300"
-              }`}
-            >
-              {filtro.toUpperCase()}
+          <View className="flex-row items-center">
+            <View className={`w-2.5 h-2.5 rounded-full mr-1.5 ${dotClass}`} />
+            <Text className={`text-xs font-semibold ${theme.textSoft}`}>
+              {estadoConexion}
             </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      {/* Feed Principal */}
-      <FlatList
-        data={eventosFiltrados}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
-        contentContainerStyle={{ padding: 16 }}
-        ListEmptyComponent={
-          <View className="items-center justify-center py-10">
-            {estadoConexion === "CONECTANDO" ? (
-              <ActivityIndicator size="large" color="#10b981" />
-            ) : (
-              <Text className="text-sm text-gray-500">
-                Esperando eventos de GitHub...
-              </Text>
-            )}
           </View>
-        }
-      />
+        </View>
+
+        {/* Panel de Métricas */}
+        <View className="px-4 py-3" style={{ backgroundColor: theme.surfaceMuted }}>
+          <Text className={`text-xs mb-1.5 ${theme.textMuted}`}>
+            Métricas de Sesión:
+          </Text>
+          <View className="flex-row justify-between">
+            <Text className={`text-sm ${theme.textSoft}`}>⭐ {metricas.stars}</Text>
+            <Text className={`text-sm ${theme.textSoft}`}>🐛 {metricas.issues}</Text>
+            <Text className={`text-sm ${theme.textSoft}`}>🚀 {metricas.commits}</Text>
+            <Text className={`text-sm ${theme.textSoft}`}>❓ {metricas.otros}</Text>
+          </View>
+        </View>
+
+        {/* Filtros */}
+        <View className="flex-row px-4 py-2.5 gap-2">
+          {["todos", "star", "issues", "push"].map((filtro) => (
+            <TouchableOpacity
+              key={filtro}
+              onPress={() => setFiltroSeleccionado(filtro)}
+              className={`px-3 py-1.5 rounded-full border ${
+                theme.border
+              } ${
+                filtroSeleccionado === filtro
+                  ? "bg-emerald-500 border-emerald-500"
+                  : ""
+              }`}
+              style={
+                filtroSeleccionado === filtro
+                  ? undefined
+                  : { backgroundColor: theme.surface }
+              }
+            >
+              <Text
+                className={`text-xs font-semibold ${
+                  filtroSeleccionado === filtro
+                    ? "text-neutral-950"
+                    : theme.textSoft
+                }`}
+              >
+                {filtro.toUpperCase()}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        {/* Feed Principal */}
+        <FlatList
+          data={eventosFiltrados}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+          contentContainerStyle={{ padding: 16 }}
+          ListEmptyComponent={
+            <View className="items-center justify-center py-10">
+              {estadoConexion === "CONECTANDO" ? (
+                <ActivityIndicator size="large" color="#10b981" />
+              ) : (
+                <Text className={`text-sm ${theme.textMuted}`}>
+                  Esperando eventos de GitHub...
+                </Text>
+              )}
+            </View>
+          }
+        />
+      </Screen>
     </SafeAreaView>
   );
 }

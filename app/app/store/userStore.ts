@@ -18,8 +18,6 @@ export const useUserStore = create<UserState>((set) => ({
   toggleTheme: () => set((state) => ({ isDarkMode: !state.isDarkMode })),
 }));
 
-
-// En la pantalla de Detalles o Configuración: Añade inputs para cambiar el nombre de usuario y un switch/botón para alternar el modo oscuro (isDarkMode).
 // Sincronizar el Tema Visual:
 // Usa el estado isDarkMode del store para aplicar dinámicamente colores de fondo claro u oscuro a la interfaz de la aplicación de manera global.
 // 🎯 Mini Concepto Extra - Reto Obligatorio (Persistencia Local) 💾
