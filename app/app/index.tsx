@@ -7,10 +7,12 @@ import {
   ScrollView,
   Alert,
   Image,
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useUserStore } from "./store/userStore";
+import { useHydrated } from "./store/useHydrated";
 import { Button } from "../components/Button";
 import { Card, Screen, useTheme } from "../components/Screen";
 
@@ -43,13 +45,13 @@ export interface DetalleModel {
 }
 
 export default function Clase1Basicos() {
+  const hydrated = useHydrated();
   const { username, profileImage } = useUserStore();
-
-  const handlePressEjercicio = () => {
-    router.push("/chat");
-  };
-
   const [tiempoActivo, setTiempoActivo] = useState(0);
+  const [siguiendo, setSiguiendo] = useState(false);
+  const [love, setLove] = useState(false);
+  const [loveCount, setLoveCount] = useState(0);
+  const theme = useTheme();
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -59,9 +61,9 @@ export default function Clase1Basicos() {
     return () => clearInterval(interval);
   }, []);
 
-  const [siguiendo, setSiguiendo] = useState(false);
-  const [love, setLove] = useState(false);
-  const [loveCount, setLoveCount] = useState(0);
+  const handlePressEjercicio = () => {
+    router.push("/chat");
+  };
 
   const handleLovePress = () => {
     setLove((prevLove) => {
@@ -84,7 +86,13 @@ export default function Clase1Basicos() {
     });
   };
 
-  const theme = useTheme();
+  if (!hydrated) {
+    return (
+      <Screen className="flex-1 items-center justify-center">
+        <ActivityIndicator size="large" color="#10b981" />
+      </Screen>
+    );
+  }
 
   return (
     <Screen className="flex-1">
