@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -9,6 +9,8 @@ import {
   View,
 } from "react-native";
 import { Card, Screen, useTheme } from "../components/Screen";
+import { useQuery } from "@tanstack/react-query";
+import { useAppStateFocus } from "./store/useAppStateFocus";
 
 interface Company {
   name: string;
@@ -25,55 +27,38 @@ interface User {
 }
 
 const API_URL = "https://jsonplaceholder.typicode.com/users";
-// "https://jsonplaceholder.typicode.com/users-error"
+
+const fetchUsers = async () => {
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+
+  const respuesta = await fetch(API_URL);
+
+  if (!respuesta.ok) {
+    throw new Error("Error al traer los datos");
+  }
+  return respuesta.json();
+};
 
 export default function Usuarios() {
-  const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [search, setSearch] = useState("");
   const theme = useTheme();
+  useAppStateFocus();
 
-  const fetchUsers = useCallback(async (isRefresh = false) => {
-    if (isRefresh) {
-      setRefreshing(true);
-    } else {
-      setLoading(true);
-    }
-    setError(null);
+  const { data, isLoading, isError, error, refetch, isRefetching } = useQuery<
+    User[]
+  >({
+    queryKey: ["users"],
+    queryFn: () => fetchUsers(),
+    staleTime: 1000 * 60 * 5,
+  });
 
-    try {
-      const respuesta = await fetch(API_URL);
+  const [search, setSearch] = useState("");
 
-      if (!respuesta.ok) {
-        throw new Error(
-          `No se pudo cargar la lista (status ${respuesta.status})`,
-        );
-      }
-
-      const json: User[] = await respuesta.json();
-      setUsers(json);
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Ocurrió un error inesperado",
-      );
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
-
-  const filteredUsers = users.filter((u) =>
+  const filteredUsers = data?.filter((u) =>
     u.name.toLowerCase().includes(search.trim().toLowerCase()),
   );
 
   // --- Estado: Loading ---
-  if (loading) {
+  if (isLoading) {
     return (
       <Screen className="flex-1 items-center justify-center">
         <ActivityIndicator size="large" color="#10b981" />
@@ -85,7 +70,7 @@ export default function Usuarios() {
   }
 
   // --- Estado: Error ---
-  if (error) {
+  if (isError) {
     return (
       <Screen className="flex-1 items-center justify-center px-6">
         <View className="bg-[#3a1f1f] border border-red-500/40 rounded-2xl p-6 w-full items-center">
@@ -93,10 +78,12 @@ export default function Usuarios() {
           <Text className="text-red-400 font-bold text-lg mb-1">
             Algo salió mal
           </Text>
-          <Text className="text-red-200 text-center text-sm mb-4">{error}</Text>
+          <Text className="text-red-200 text-center text-sm mb-4">
+            {error?.message}
+          </Text>
           <TouchableOpacity
             className="bg-emerald-500 rounded-xl px-6 py-3 w-full items-center"
-            onPress={() => fetchUsers()}
+            onPress={() => refetch()}
           >
             <Text className="text-black font-semibold text-base">
               Reintentar Petición 🔄
@@ -126,8 +113,8 @@ export default function Usuarios() {
         keyExtractor={(item) => String(item.id)}
         refreshControl={
           <RefreshControl
-            refreshing={refreshing}
-            onRefresh={() => fetchUsers(true)}
+            refreshing={isRefetching}
+            onRefresh={refetch}
             tintColor="#10b981"
           />
         }

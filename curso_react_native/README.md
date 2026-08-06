@@ -38,6 +38,6 @@ Para cada clase, te daré un archivo `.tsx` que guardaremos en `curso_react_nati
 Para verlo en acción:
 1. Copia todo el contenido del ejemplo de la clase.
 2. Pégalo en tu archivo [app/app/index.tsx](file:///C:/Users/Desk/git/multiStack/Placeholdername/app/app/index.tsx).
-3. Abre tu terminal en `app/` y corre `npm run start` o `npx expo start` para verlo en tu celular o simulador.
+3. Abre tu terminal en `app/` y corre `npm run android` para compilar e iniciar la aplicación directamente en tu emulador de Android (o `npm run start` si prefieres escanear el código QR con tu móvil).
 
 ¡Comencemos con la **Clase 1**! Escribe en el chat cuando estés listo para avanzar o si tienes dudas sobre esta estructura.
