@@ -98,9 +98,7 @@ export default function Clase1Basicos() {
     <Screen className="flex-1">
       <ScrollView className="flex-1 p-6 pt-12">
         <View className="mb-2">
-          <Text
-            className={`text-3xl font-bold text-center ${theme.text}`}
-          >
+          <Text className={`text-3xl font-bold text-center ${theme.text}`}>
             Curso de React Native
           </Text>
         </View>
@@ -136,61 +134,66 @@ export default function Clase1Basicos() {
                   Me gusta gemini
                 </Text>
               </View>
-            <View className="flex-row items-center gap-5 my-2">
-              <Button
-                onPress={() => setSiguiendo(!siguiendo)}
-                style={siguiendo ? "dark" : "light"}
-                titulo={siguiendo ? "Siguiendo" : "Seguir"}
-              />
-              <Button
-                onPress={() =>
-                  handleVerPress({
-                    nombre: username,
-                    rol: "Desarrollador de software",
-                    tiempoActivo: tiempoActivo,
-                    siguiendo: siguiendo,
-                    likes: loveCount,
-                  })
-                }
-                style="line"
-                titulo="Ver"
-              />
-              <Ionicons
-                onPress={() => handleLovePress()}
-                name={love ? "heart" : "heart-outline"}
-                size={24}
-                color={theme.color}
-              />
-            </View>
-            <View className="flex-row items-center w-full justify-around my-2">
-              <StatItem label="Likes" value={loveCount} />
-              <StatItem label="Seguidores" value={120} />
-              <StatItem label="Siguiendo" value={80} />
-            </View>
+              <View className="flex-row items-center gap-5 my-2">
+                <Button
+                  onPress={() => setSiguiendo(!siguiendo)}
+                  style={siguiendo ? "dark" : "light"}
+                  titulo={siguiendo ? "Siguiendo" : "Seguir"}
+                />
+                <Button
+                  onPress={() =>
+                    handleVerPress({
+                      nombre: username,
+                      rol: "Desarrollador de software",
+                      tiempoActivo: tiempoActivo,
+                      siguiendo: siguiendo,
+                      likes: loveCount,
+                    })
+                  }
+                  style="line"
+                  titulo="Ver"
+                />
+                <Ionicons
+                  onPress={() => handleLovePress()}
+                  name={love ? "heart" : "heart-outline"}
+                  size={24}
+                  color={theme.color}
+                />
+              </View>
+              <View className="flex-row items-center w-full justify-around my-2">
+                <StatItem label="Likes" value={loveCount} />
+                <StatItem label="Seguidores" value={120} />
+                <StatItem label="Siguiendo" value={80} />
+              </View>
 
-            <TouchableOpacity
-              className="bg-emerald-500 rounded-lg py-3 items-center justify-center mt-4"
-              onPress={handlePressEjercicio}
-            >
-              <Text className="text-black font-semibold text-base">
-                Enviar Mensaje
-              </Text>
-            </TouchableOpacity>
-          </View>
+              <TouchableOpacity
+                className="bg-emerald-500 rounded-lg py-3 items-center justify-center mt-4"
+                onPress={handlePressEjercicio}
+              >
+                <Text className="text-black font-semibold text-base">
+                  Enviar Mensaje
+                </Text>
+              </TouchableOpacity>
+            </View>
           </Card>
-        <View className="my-2 gap-2">
-          <Button
-            titulo=" Ver más usuarios"
-            onPress={() => router.push("/usuarios")}
-            style="line"
-          />
-          <Button
-            titulo="Github Radar"
-            onPress={() => router.push("/radar")}
-            style="line"
-          />
+          <View className="my-2 gap-2">
+            <Button
+              titulo=" Ver más usuarios"
+              onPress={() => router.push("/usuarios")}
+              style="line"
+            />
+            <Button
+              titulo="Github Radar"
+              onPress={() => router.push("/radar")}
+              style="line"
+            />
+            <Button
+              titulo="Configuración"
+              onPress={() => router.push("/configuracion")}
+              style="line"
+            />
+          </View>
         </View>
-      </View>
       </ScrollView>
     </Screen>
   );
