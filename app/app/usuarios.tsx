@@ -11,6 +11,17 @@ import {
 import { Card, Screen, useTheme } from "../components/Screen";
 import { useQuery } from "@tanstack/react-query";
 import { useAppStateFocus } from "./store/useAppStateFocus";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  withTiming,
+  withRepeat,
+  withSequence,
+  FadeInUp,
+  FadeOutDown,
+  LinearTransition,
+} from "react-native-reanimated";
 
 interface Company {
   name: string;
@@ -108,7 +119,8 @@ export default function Usuarios() {
         style={{ backgroundColor: theme.surfaceAlt, color: theme.color }}
       />
 
-      <FlatList
+      <Animated.FlatList
+        layout={LinearTransition.springify()}
         data={filteredUsers}
         keyExtractor={(item) => String(item.id)}
         refreshControl={
