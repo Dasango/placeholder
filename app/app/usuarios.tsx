@@ -12,13 +12,8 @@ import { Card, Screen, useTheme } from "../components/Screen";
 import { useQuery } from "@tanstack/react-query";
 import { useAppStateFocus } from "./store/useAppStateFocus";
 import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-  withTiming,
-  withRepeat,
-  withSequence,
-  FadeInUp,
+  SlideInLeft,
+  SlideInRight,
   FadeOutDown,
   LinearTransition,
 } from "react-native-reanimated";
@@ -139,7 +134,15 @@ export default function Usuarios() {
           </View>
         }
         renderItem={({ item }) => (
-          <Card className="rounded-2xl p-4 mb-3">
+          <Card
+            className="rounded-2xl p-4 mb-3"
+            entering={
+              item.id % 2 !== 0
+                ? SlideInLeft.duration(300)
+                : SlideInRight.duration(300)
+            }
+            exiting={FadeOutDown.duration(200)}
+          >
             <Text className={`font-bold text-base ${theme.text}`}>
               {item.name}
             </Text>

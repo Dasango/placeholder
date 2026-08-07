@@ -5,12 +5,6 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
-  withTiming,
-  withRepeat,
-  withSequence,
-  FadeInUp,
-  FadeOutDown,
-  LinearTransition,
 } from "react-native-reanimated";
 
 export type ThemeName = "dark" | "light";
@@ -95,12 +89,17 @@ interface CardProps {
   children: React.ReactNode;
   className?: string;
   style?: StyleProp<ViewStyle>;
+  entering?: React.ComponentProps<typeof Animated.View>["entering"];
+  exiting?: React.ComponentProps<typeof Animated.View>["exiting"];
 }
 
-// Tarjetas con Efecto de Presión Elástica (Spring Press) 👆:
-// Envuelve cada tarjeta en un componente interactivo (TouchableOpacity o Pressable).
-// Utiliza un sharedValue (por ejemplo, scale = useSharedValue(1)) y los hooks useAnimatedStyle para que, cuando el usuario mantenga presionada la tarjeta, esta reduzca su tamaño suavemente (ej. scale.value = 0.95) y regrese a su tamaño original al soltarla usando withSpring.
-export function Card({ children, className = "", style }: CardProps) {
+export function Card({
+  children,
+  className = "",
+  style,
+  entering,
+  exiting,
+}: CardProps) {
   const theme = useTheme();
   const scale = useSharedValue(1);
 
@@ -115,7 +114,7 @@ export function Card({ children, className = "", style }: CardProps) {
   };
 
   const handlePressOut = () => {
-    scale.value = 1;
+    scale.value = withSpring(1);
   };
 
   return (
@@ -125,7 +124,8 @@ export function Card({ children, className = "", style }: CardProps) {
       activeOpacity={0.2}
     >
       <Animated.View
-        entering={FadeInUp.duration(1000)}
+        entering={entering}
+        exiting={exiting}
         className={`border ${theme.border} ${className}`}
         style={[{ backgroundColor: theme.surface }, style, animatedBoxStyle]}
       >
