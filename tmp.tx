@@ -1,0 +1,22 @@
+¡Sí! Es real — NVIDIA regala créditos de inferencia gratis a través de su plataforma **NVIDIA Build (build.nvidia.com)**, que da acceso a más de 100 modelos (DeepSeek, Llama, Qwen, GLM, Nemotron, etc.) mediante una API compatible con el formato de OpenAI. Consigues una API key gratis con cerca de 1,000 créditos de inferencia apenas te unes al NVIDIA Developer Program, sin necesidad de tarjeta de crédito.Un ejemplo rápido de código en Python para el primer llamado, usando el SDK de OpenAI (solo cambia `base_url` y `api_key`):
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="https://integrate.api.nvidia.com/v1",
+    api_key="nvapi-TU_KEY_AQUI"
+)
+
+response = client.chat.completions.create(
+    model="meta/llama-3.1-70b-instruct",  # o el modelo que elijas
+    messages=[{"role": "user", "content": "Hola, ¿cómo estás?"}]
+)
+
+print(response.choices[0].message.content)
+```
+
+Un par de cosas a tener en cuenta:
+- El límite de la capa gratuita es de **40 solicitudes por minuto**, así que es ideal para prototipar, no para producción con usuarios reales.
+- Si quieres pasar a producción (servir a usuarios finales o transacciones de negocio), NVIDIA tiene otra categoría de uso con requisitos distintos.
+- Vale la pena revisar la documentación oficial en build.nvidia.com para confirmar los límites y modelos disponibles al momento, porque este tipo de ofertas cambian con frecuencia.
