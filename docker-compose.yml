@@ -8,12 +8,5 @@ services:
     depends_on:
       - relay
 
-  relay:
-    build:
-      context: ./relay
-      dockerfile: Dockerfile
-    ports:
-      - "3001:3001"
-
 volumes:
   n8n_data:
