@@ -1,10 +1,25 @@
 services:
   n8n:
-    image: n8nio/n8n
+    image: n8nio/n8n:latest
     ports:
       - "5678:5678"
     volumes:
       - n8n_data:/home/node/.n8n
+    depends_on:
+      - postgres-db
+
+  postgres-db:
+    image: pgvector/pgvector:pg16
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=rag_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=rag_secure_pass_123
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db:/docker-entrypoint-initdb.d:ro
 
 volumes:
   n8n_data:
+  postgres_data:

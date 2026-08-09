@@ -1,0 +1,127 @@
+{
+    "updatedAt":  "2026-07-30T00:21:09.455Z",
+    "createdAt":  "2026-07-30T00:00:45.789Z",
+    "id":  "F8CyvVdSymzrtHER",
+    "name":  "My workflow",
+    "description":  null,
+    "active":  true,
+    "isArchived":  false,
+    "nodes":  [
+                  {
+                      "parameters":  {
+                                         "httpMethod":  "POST",
+                                         "path":  "github-webhook",
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.webhook",
+                      "typeVersion":  2.1,
+                      "position":  [
+                                       -192,
+                                       0
+                                   ],
+                      "id":  "be416ad8-1bf9-4d4a-b5b6-45220d989fe6",
+                      "name":  "Webhook",
+                      "webhookId":  "f37f00a3-016b-43a1-9a88-904f80d2eb8d"
+                  },
+                  {
+                      "parameters":  {
+                                         "method":  "POST",
+                                         "url":  "http://host.docker.internal:3001/event",
+                                         "sendBody":  true,
+                                         "bodyParameters":  {
+                                                                "parameters":  [
+                                                                                   {
+                                                                                       "name":  "event",
+                                                                                       "value":  "={{ $json.headers[\u0027x-github-event\u0027] }}"
+                                                                                   },
+                                                                                   {
+                                                                                       "name":  "repo",
+                                                                                       "value":  "={{ $json.body.repository.full_name }}"
+                                                                                   },
+                                                                                   {
+                                                                                       "name":  "actor",
+                                                                                       "value":  "={{ $json.body.sender.login }}"
+                                                                                   },
+                                                                                   {
+                                                                                       "name":  "timestamp",
+                                                                                       "value":  "={{ Date.now() }}"
+                                                                                   }
+                                                                               ]
+                                                            },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.httpRequest",
+                      "typeVersion":  4.4,
+                      "position":  [
+                                       16,
+                                       0
+                                   ],
+                      "id":  "8edf2885-fd59-4311-81f4-44b5908a0a88",
+                      "name":  "HTTP Request"
+                  }
+              ],
+    "connections":  {
+                        "Webhook":  {
+                                        "main":  [
+                                                     [
+                                                         {
+                                                             "node":  "HTTP Request",
+                                                             "type":  "main",
+                                                             "index":  0
+                                                         }
+                                                     ]
+                                                 ]
+                                    }
+                    },
+    "settings":  {
+                     "executionOrder":  "v1",
+                     "binaryMode":  "separate",
+                     "availableInMCP":  false
+                 },
+    "staticData":  null,
+    "meta":  null,
+    "nodeGroups":  [
+
+                   ],
+    "pinData":  {
+
+                },
+    "versionId":  "48031a24-5dce-49ff-a4dc-3e2f3037e100",
+    "activeVersionId":  "48031a24-5dce-49ff-a4dc-3e2f3037e100",
+    "versionCounter":  29,
+    "triggerCount":  1,
+    "sourceWorkflowId":  null,
+    "tags":  [
+
+             ],
+    "shared":  [
+                   {
+                       "updatedAt":  "2026-07-30T00:00:45.794Z",
+                       "createdAt":  "2026-07-30T00:00:45.794Z",
+                       "role":  "workflow:owner",
+                       "workflowId":  "F8CyvVdSymzrtHER",
+                       "projectId":  "MW6PXThccTO2bMzm",
+                       "project":  {
+                                       "updatedAt":  "2026-07-18T19:23:00.904Z",
+                                       "createdAt":  "2026-07-18T19:22:14.685Z",
+                                       "id":  "MW6PXThccTO2bMzm",
+                                       "name":  "David Sango \u003csangofuentesdavid@gmail.com\u003e",
+                                       "type":  "personal",
+                                       "icon":  null,
+                                       "description":  null,
+                                       "customTelemetryTags":  [
+
+                                                               ],
+                                       "creatorId":  "6fdd8426-84a5-4d6e-9ca9-d05298588ac3"
+                                   }
+                   }
+               ],
+    "versionMetadata":  {
+                            "name":  "Version 48031a24",
+                            "description":  ""
+                        }
+}
