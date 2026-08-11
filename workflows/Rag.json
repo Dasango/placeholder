@@ -19,7 +19,7 @@
     },
     {
       "parameters": {
-        "model": "phi4-mini:latest",
+        "model": "nomic-embed-text:latest",
         "options": {}
       },
       "id": "6b02cdbe-3a6f-4fe9-8352-a6030f17b4ce",
@@ -294,7 +294,7 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "ced391cb-2cad-4eb2-9c32-d5560b69fa78",
+  "versionId": "665952e5-c67e-4528-acfa-e2c978bcabe0",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "923db07cd4c9ca6fb0f3c907af115c67f9c3a22ed9c310bab7739bb018b68fd7"
