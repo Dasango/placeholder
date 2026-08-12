@@ -53,8 +53,8 @@
     },
     {
       "parameters": {
-        "content": "### Readme\nLoad your data into a vector database with the Ã°Å¸â€œÅ¡ **Load Data** flow, and then use your data as chat context with the Ã°Å¸Ââ€¢ **Retriever** flow.\n\n**Quick start**\n1. Click on the `Execute Workflow` button to run the Ã°Å¸â€œÅ¡ **Load Data** flow.\n2. Click on `Open Chat` button to run the Ã°Å¸Ââ€¢ **Retriever** flow. Then ask a question about content from your document(s)\n\n\nFor more info, check our [docs on RAG in n8n](https://docs.n8n.io/advanced-ai/rag-in-n8n/)",
-        "height": 300,
+        "content": "### Readme\nLoad your data into a vector database with the **Load Data** flow, and then use your data as chat context with the **Retriever** flow.\n\n**Quick start**\n1. Click on the `Execute Workflow` button to run the **Load Data** flow.\n2. Click on `Open Chat` button to run the **Retriever** flow. Then ask a question about content from your document(s)\n\n\nFor more info, check our [docs on RAG in n8n](https://docs.n8n.io/advanced-ai/rag-in-n8n/)",
+        "height": 412,
         "width": 440,
         "color": 4
       },
@@ -106,7 +106,7 @@
     {
       "parameters": {
         "mode": "retrieve-as-tool",
-        "toolDescription": "Use this knowledge base to answer questions from the user",
+        "toolDescription": "Always use the available tools to query the internal vector database before answering. Do not output raw JSON or code snippets; invoke the tool directly.",
         "options": {}
       },
       "id": "f3dc5a2a-4aaf-4cac-80bb-ff70aa9c7ff9",
@@ -128,7 +128,9 @@
       "parameters": {
         "promptType": "define",
         "text": "={{ $json.body.message }}",
-        "options": {}
+        "options": {
+          "systemMessage": "You are an assistant with access to an internal vector database containing uploaded documents and letters. Always search the database using the Query Data Tool before declaring that you do not have the information."
+        }
       },
       "id": "ce444f5d-8199-4c81-b99f-aba16d5c08e3",
       "name": "AI Agent",
@@ -294,7 +296,7 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "665952e5-c67e-4528-acfa-e2c978bcabe0",
+  "versionId": "123c9708-34c8-45ca-8cef-e5afd4ad0bda",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "923db07cd4c9ca6fb0f3c907af115c67f9c3a22ed9c310bab7739bb018b68fd7"

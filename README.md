@@ -1,96 +1,111 @@
 # Local Document RAG (n8n + PostgreSQL pgvector + Expo React Native)
 
-Este proyecto es una aplicación de inteligencia artificial (RAG - Retrieval-Augmented Generation) ejecutada **100% de forma local** para almacenar y chatear con tus propios documentos (.PDF, .CSV).
+    # Documentación del Backend RAG (n8n Webhooks)
 
-La base de datos vectorial es persistente gracias a Docker, y los flujos de n8n se sincronizan automáticamente con tu repositorio Git mediante scripts de PowerShell provistos.
+    Esta documentación describe la interfaz técnica para interactuar con el backend RAG (Retrieval-Augmented
 
----
+Generation) alojado en n8n. Contiene los dos únicos endpoints disponibles para el usuario final: subida de archivos
+y consulta conversacional.
 
-## 🏗️ Arquitectura del Sistema
+    ---
 
-```
-[ Celular / App Expo ] ──(Webhooks HTTP)──► [ n8n Docker ] ──► [ OpenAI LLM / Embeddings ]
-                                                │
-                                                ▼ (Vectores)
-                                      [ Postgres pgvector Docker ]
-```
+    ## 1. Subida de Documentos (Ingesta RAG)
 
-1. **Frontend Móvil:** App en React Native con Expo utilizando **NativeWind** (Tailwind CSS) con dos pantallas interactivas: selector/subidor de PDFs y sala de chat.
-2. **Orquestador (n8n):** Flujo local en Docker que recibe los documentos mediante Webhooks, procesa el texto, genera los embeddings y atiende las consultas del chat del usuario mediante un Agente de IA.
-3. **Persistencia (PostgreSQL + pgvector):** Base de datos PostgreSQL local en Docker con soporte para vectores, permitiendo acceder a la información indexada hoy, en 2 semanas, o en 5 años.
+    Este endpoint se utiliza para cargar cartas, documentos y archivos PDF en la base de datos vectorial interna. Los
 
----
+fragmentos del documento serán indexados y generarán los embeddings correspondientes para búsquedas futuras.
 
-## ⚡ Guía de Inicio Rápido
+    * **URL del Endpoint:**
+      * **Producción:** `POST http://localhost:5678/webhook/upload-pdf`
+      * **Pruebas (Test UI):** `POST http://localhost:5678/webhook-test/upload-pdf`
+    * **Método HTTP:** `POST`
+    * **Content-Type:** `multipart/form-data`
 
-Sigue estos pasos para arrancar el proyecto en tu entorno local.
+    ### Parámetros de la Petición (Request Body)
 
-### Paso 1: Iniciar los contenedores de Docker
-Asegúrate de tener Docker Desktop abierto y ejecuta en la raíz del proyecto:
-```bash
-docker compose up -d
-```
-Esto levantará dos contenedores:
-* **n8n** en `http://localhost:5678`
-* **PostgreSQL + pgvector** en el puerto `5432` (inicializado automáticamente con la extensión de vectores).
+    La petición debe enviarse codificada como `form-data`. Contiene el siguiente campo:
 
-### Paso 2: Importar los flujos de trabajo a n8n
-Hemos creado un script que une tus flujos guardados y los sube a n8n. Ejecuta en PowerShell:
-```powershell
-.\restore-workflows.ps1
-```
-Una vez ejecutado, abre `http://localhost:5678` en tu navegador. Encontrarás el flujo **Rag** ya listo.
+    | Nombre del Campo | Tipo | Ubicación | Descripción |
+    | :--- | :--- | :--- | :--- |
+    | `data` (o el archivo directo) | `file` (Binario) | Body (`form-data`) | El documento (PDF, texto, etc.) que se
 
-### Paso 3: Configurar credenciales en n8n
-Dentro de la interfaz web de n8n, abre el flujo **Rag** y configura las siguientes credenciales:
+desea ingestar en la base de datos. |
 
-1. **Credencial de OpenAI:** Agrega tu OpenAI API Key en el nodo `Embeddings OpenAI` o `OpenAI Chat Model`.
-2. **Credencial de PostgreSQL:** En el nodo `Insert Data to Store` o `Query Data Tool`, crea una credencial de tipo **Postgres** con estos datos:
-   * **Host:** `postgres-db`
-   * **Database:** `rag_db`
-   * **User:** `postgres`
-   * **Password:** `rag_secure_pass_123`
-   * **Port:** `5432`
-   * **SSL:** `Disable`
+    ### Ejemplo en cURL
 
-*Guarda los cambios y activa (deja en ON) el flujo de n8n.*
+    ```bash
+    curl -X POST http://localhost:5678/webhook/upload-pdf \
+      -H "Content-Type: multipart/form-data" \
+      -F "data=@/ruta/a/tu/carta_delegacion.pdf"
 
-### Paso 4: Iniciar la Aplicación Móvil
-Navega a la carpeta de la app móvil, instala dependencias e inicializa el servidor de desarrollo de Expo:
-```bash
-cd app
-npm install
-npx expo start
-```
-Escanea el código QR desde tu celular con la app **Expo Go** (Android) o la cámara (iOS).
+### Respuesta del Servidor (Response)
 
-* **Importante:** Dado que n8n corre en tu PC, en la app móvil abre el menú de configuración (icono de engranaje ⚙️) e ingresa la **IP local de tu computadora** en tu red Wi-Fi (ejemplo: `http://192.168.1.15:5678`) para conectar el celular.
+Devuelve el estado de procesamiento del flujo de n8n.
 
----
+• Código de Estado: 200 OK
+• Cuerpo de Respuesta (JSON):
+[
+{
+"success": true
+}
+]
 
-## 🔄 Sincronización con Git
+──────
 
-Para evitar perder los cambios que hagas directamente en la interfaz web de n8n, hemos creado herramientas que documentan tus flujos directamente en el Git de tu repositorio:
+## 2. Consulta y Chat Conversacional (Agente RAG)
 
-* **Hacer copia de seguridad (Exportar a Git):**
-  Ejecuta este comando antes de hacer un commit. Extrae todos tus flujos de n8n, los divide en archivos JSON legibles dentro de la carpeta `workflows/` y los deja listos para guardar en Git:
-  ```powershell
-  .\backup-workflows.ps1
-  ```
+Este endpoint se utiliza para enviar preguntas al Agente RAG. El agente buscará de forma autónoma en los documentos
+ingestados utilizando los embeddings y responderá la pregunta basándose en el contenido de la base de datos
+vectorial.
 
-* **Restaurar flujos (Importar a n8n):**
-  Si descargas el repositorio en otra computadora o quieres recuperar el estado original guardado en Git:
-  ```powershell
-  .\restore-workflows.ps1
-  ```
+• URL del Endpoint:
+• Producción: POST http://localhost:5678/webhook/chat
+• Pruebas (Test UI): POST http://localhost:5678/webhook-test/chat
+• Método HTTP: POST
+• Content-Type: application/json
 
----
+### Parámetros de la Petición (Request Body)
 
-## 📂 Estructura del Repositorio
+El cuerpo de la petición debe enviarse en formato JSON con la siguiente estructura:
 
-* [`app/`](file:///C:/Users/Desk/git/multiStack/Placeholdername/app) - Código fuente de la app React Native (Expo).
-* [`workflows/`](file:///C:/Users/Desk/git/multiStack/Placeholdername/workflows) - Flujos de trabajo de n8n serializados en JSON para Git.
-* [`init-db/init.sql`](file:///C:/Users/Desk/git/multiStack/Placeholdername/init-db/init.sql) - Script SQL para inicializar PostgreSQL con la extensión de vectores al primer arranque.
-* [`docker-compose.yml`](file:///C:/Users/Desk/git/multiStack/Placeholdername/docker-compose.yml) - Configuración de contenedores locales de Docker.
-* [`backup-workflows.ps1`](file:///C:/Users/Desk/git/multiStack/Placeholdername/backup-workflows.ps1) - Script para exportar flujos de Docker a Git.
-* [`restore-workflows.ps1`](file:///C:/Users/Desk/git/multiStack/Placeholdername/restore-workflows.ps1) - Script para importar flujos de Git a Docker.
+    {
+      "message": "¿Qué dice la carta sobre las delegaciones?"
+    }
+
+Campo │ Tipo │ Obligatorio │ Descripción
+───────────┼───────────┼─────────────┼──────────────────────────────────────────────────────────────────────────────
+message │ string │ Sí │ La pregunta o consulta en lenguaje natural sobre los documentos almacenados.
+
+### Ejemplo en cURL
+
+    curl -X POST http://localhost:5678/webhook/chat \
+      -H "Content-Type: application/json; charset=utf-8" \
+      -d '{"message": "¿Qué dice la carta sobre las delegaciones?"}'
+
+### Respuesta del Servidor (Response)
+
+El backend procesa la petición de forma síncrona y devuelve la respuesta formulada por el Agente.
+
+• Código de Estado: 200 OK
+• Cuerpo de Respuesta (JSON):
+{
+"output": "La carta menciona que Edgar Abel Sango Pillalaza ha designado a Neris Marcelo Rosero Galarza como su
+delegado..."
+}
+
+──────
+
+## Notas de Integración y Códigos de Error
+
+### Webhooks en Modo Test vs Producción
+
+• Para usar los endpoints de Pruebas (/webhook-test/...), debes presionar previamente el botón "Execute workflow" en
+la interfaz gráfica de n8n. Este puerto de pruebas solo escucha durante 120 segundos o para una única ejecución.
+• Para usar los endpoints de Producción (/webhook/...), el flujo de trabajo en n8n debe estar activado y publicado.
+
+### Errores Comunes
+
+• 404 Not Found: Si intentas llamar al webhook de pruebas sin haber pulsado "Execute workflow" en la UI de n8n, o si
+el flujo de producción no está activo.
+• 500 Internal Server Error: Ocurre si la base de datos Postgres/pgvector no es accesible o el motor LLM (Ollama)
+local se encuentra apagado o no responde en el tiempo límite.
