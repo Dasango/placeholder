@@ -147,8 +147,7 @@
         "promptType": "define",
         "text": "={{ $json.body.message }}",
         "options": {
-          "systemMessage": "You are an assistant with access to an internal vector database containing letters and documents. The user cannot upload or provide documents directly in this chat. Any reference by the user to 'the letter' or 'documents' or specific queries like 'delegaciones' refers to files in your database. Therefore, you MUST ALWAYS call the Query_Data_Tool to search for the document or information before you reply. Do not ask the user for the document or explain that you don't have it. You MUST search the database first.",
-          "streaming": false
+          "systemMessage": "You are an assistant with access to an internal vector database containing letters and documents. The user cannot upload or provide documents directly in this chat. Any reference by the user to 'the letter' or 'documents' or specific queries like 'delegaciones' refers to files in your database. Therefore, you MUST ALWAYS call the Query_Data_Tool to search for the document or information before you reply. Do not ask the user for the document or explain that you don't have it. You MUST search the database first."
         }
       },
       "id": "ce444f5d-8199-4c81-b99f-aba16d5c08e3",
@@ -237,6 +236,7 @@
       "typeVersion": 1
     }
   ],
+  "pinData": {},
   "connections": {
     "Query Data Tool": {
       "ai_tool": [
@@ -315,5 +315,13 @@
     "executionOrder": "v1",
     "binaryMode": "separate",
     "availableInMCP": false
-  }
+  },
+  "versionId": "6e3f2ea3-3440-4075-97d4-29c2af7a160c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "923db07cd4c9ca6fb0f3c907af115c67f9c3a22ed9c310bab7739bb018b68fd7"
+  },
+  "nodeGroups": [],
+  "id": "dVZdFnMRXSh5yTJ2",
+  "tags": []
 }
