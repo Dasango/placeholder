@@ -40,7 +40,16 @@
     {
       "parameters": {
         "dataType": "binary",
-        "options": {}
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "project_id",
+                "value": "={{ $('Upload your file here').item.json.body.projectId }}"
+              }
+            ]
+          }
+        }
       },
       "id": "cf7114d7-c473-4fb1-8570-227cae596877",
       "name": "Default Data Loader",
@@ -106,8 +115,17 @@
     {
       "parameters": {
         "mode": "retrieve-as-tool",
-        "toolDescription": "Always use the available tools to query the internal vector database before answering. Do not output raw JSON or code snippets; invoke the tool directly.",
-        "options": {}
+        "toolDescription": "Use this tool to search the database for uploaded documents, files, and letters. Always call this tool when the user asks about a document, a letter, or a topic like \"delegaciones\".",
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "project_id",
+                "value": "={{ $('When chat message received').item.json.body.projectId }}"
+              }
+            ]
+          }
+        }
       },
       "id": "f3dc5a2a-4aaf-4cac-80bb-ff70aa9c7ff9",
       "name": "Query Data Tool",
@@ -129,7 +147,8 @@
         "promptType": "define",
         "text": "={{ $json.body.message }}",
         "options": {
-          "systemMessage": "You are an assistant with access to an internal vector database containing uploaded documents and letters. Always search the database using the Query Data Tool before declaring that you do not have the information."
+          "systemMessage": "You are an assistant with access to an internal vector database containing letters and documents. The user cannot upload or provide documents directly in this chat. Any reference by the user to 'the letter' or 'documents' or specific queries like 'delegaciones' refers to files in your database. Therefore, you MUST ALWAYS call the Query_Data_Tool to search for the document or information before you reply. Do not ask the user for the document or explain that you don't have it. You MUST search the database first.",
+          "streaming": false
         }
       },
       "id": "ce444f5d-8199-4c81-b99f-aba16d5c08e3",
@@ -162,11 +181,13 @@
       "parameters": {
         "model": {
           "__rl": true,
-          "value": "phi4-mini:latest",
+          "value": "qwen2.5:7b",
           "mode": "list",
-          "cachedResultName": "phi4-mini:latest"
+          "cachedResultName": "qwen2.5:7b"
         },
-        "options": {}
+        "options": {
+          "temperature": 0
+        }
       },
       "id": "e1264191-9950-43f3-bafc-80f89e3f6173",
       "name": "OpenAI Chat Model",
@@ -216,7 +237,6 @@
       "typeVersion": 1
     }
   ],
-  "pinData": {},
   "connections": {
     "Query Data Tool": {
       "ai_tool": [
@@ -290,18 +310,10 @@
       ]
     }
   },
-  "active": false,
+  "active": true,
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
     "availableInMCP": false
-  },
-  "versionId": "123c9708-34c8-45ca-8cef-e5afd4ad0bda",
-  "meta": {
-    "templateCredsSetupCompleted": true,
-    "instanceId": "923db07cd4c9ca6fb0f3c907af115c67f9c3a22ed9c310bab7739bb018b68fd7"
-  },
-  "nodeGroups": [],
-  "id": "dVZdFnMRXSh5yTJ2",
-  "tags": []
+  }
 }
