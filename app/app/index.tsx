@@ -104,7 +104,7 @@ export default function Page() {
     
     // Auto-navigate to the new project
     router.push({
-      pathname: `/project/${newProj.id}`,
+      pathname: "/project/[id]",
       params: { id: newProj.id, name: newProj.name },
     });
   };
@@ -175,7 +175,7 @@ export default function Page() {
                 key={proj.id}
                 onPress={() =>
                   router.push({
-                    pathname: `/project/${proj.id}`,
+                    pathname: "/project/[id]",
                     params: { id: proj.id, name: proj.name },
                   })
                 }
