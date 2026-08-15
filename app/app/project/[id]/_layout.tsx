@@ -14,7 +14,9 @@ interface Project {
 export default function ProjectLayout() {
   const router = useRouter();
   const { id, name } = useLocalSearchParams<{ id: string; name: string }>();
-  const [projectName, setProjectName] = useState(name || "Detalle del Proyecto");
+  const [projectName, setProjectName] = useState(
+    name || "Detalle del Proyecto",
+  );
 
   useEffect(() => {
     if (!name && id) {
@@ -62,9 +64,6 @@ export default function ProjectLayout() {
           tabBarStyle: {
             backgroundColor: "#1e293b", // slate-800
             borderTopColor: "rgba(51, 65, 85, 0.5)", // slate-700/50
-            paddingBottom: Platform.OS === "ios" ? 24 : 10,
-            paddingTop: 8,
-            height: Platform.OS === "ios" ? 88 : 64,
           },
           tabBarActiveTintColor: "#818cf8", // indigo-400
           tabBarInactiveTintColor: "#64748b", // slate-500
