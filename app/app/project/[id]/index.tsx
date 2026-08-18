@@ -10,6 +10,7 @@ import {
 import { Feather } from "@expo/vector-icons";
 import * as DocumentPicker from "expo-document-picker";
 import { useLocalSearchParams } from "expo-router";
+import { useMutation } from "@tanstack/react-query";
 import { N8N_URL } from "../../../config";
 import { useAppStore, UploadedDocument } from "../../../store";
 
@@ -24,7 +25,6 @@ export default function DocumentsScreen() {
   // Document Upload State
   const [selectedFile, setSelectedFile] =
     useState<DocumentPicker.DocumentPickerAsset | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
 
   // Document Picker
   const handleSelectDocument = async () => {
@@ -43,17 +43,14 @@ export default function DocumentsScreen() {
     }
   };
 
-  // Document Upload
-  const handleUploadDocument = async () => {
-    if (!selectedFile || !id) return;
-
-    setIsUploading(true);
-    try {
+  // Document Upload Mutation
+  const uploadMutation = useMutation({
+    mutationFn: async (file: DocumentPicker.DocumentPickerAsset) => {
       const formData = new FormData();
       formData.append("data", {
-        uri: selectedFile.uri,
-        name: selectedFile.name,
-        type: selectedFile.mimeType || "application/pdf",
+        uri: file.uri,
+        name: file.name,
+        type: file.mimeType || "application/pdf",
       } as any);
       formData.append("projectId", id);
 
@@ -70,11 +67,13 @@ export default function DocumentsScreen() {
         throw new Error(`HTTP Error: ${response.status}`);
       }
 
-      // Success
+      return file;
+    },
+    onSuccess: (file) => {
       const newDoc: UploadedDocument = {
         id: Math.random().toString(36).substr(2, 9),
-        name: selectedFile.name,
-        size: selectedFile.size || 0,
+        name: file.name,
+        size: file.size || 0,
         timestamp: new Date().toLocaleString(),
       };
 
@@ -88,15 +87,19 @@ export default function DocumentsScreen() {
         "Éxito",
         "¡El archivo ha sido indexado en el proyecto correctamente!",
       );
-    } catch (e: any) {
+    },
+    onError: (e: any) => {
       console.error("Upload error", e);
       Alert.alert(
         "Fallo de conexión",
         `No se pudo conectar al backend en ${N8N_URL}.\n\nDetalles: ${e.message}\n\nAsegúrate de que n8n esté corriendo y que tu dispositivo esté en la misma red.`,
       );
-    } finally {
-      setIsUploading(false);
-    }
+    },
+  });
+
+  const handleUploadDocument = () => {
+    if (!selectedFile || !id) return;
+    uploadMutation.mutate(selectedFile);
   };
 
   // Clear Uploaded Files list
@@ -181,10 +184,10 @@ export default function DocumentsScreen() {
           {selectedFile && (
             <TouchableOpacity
               onPress={handleUploadDocument}
-              disabled={isUploading}
+              disabled={uploadMutation.isPending}
               className="mt-4 bg-indigo-600 rounded-xl py-3 justify-center items-center flex-row gap-2"
             >
-              {isUploading ? (
+              {uploadMutation.isPending ? (
                 <>
                   <ActivityIndicator size="small" color="#fff" />
                   <Text className="text-white font-semibold">

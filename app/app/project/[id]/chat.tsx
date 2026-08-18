@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { Feather, Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
+import { useMutation } from "@tanstack/react-query";
 import { N8N_URL } from "../../../config";
 import { useAppStore, ChatMessage } from "../../../store";
 
@@ -23,30 +24,12 @@ export default function ChatScreen() {
   const chatHistory = (id ? chatsByProject[id] : []) || [];
 
   const [userInput, setUserInput] = useState("");
-  const [isSending, setIsSending] = useState(false);
 
   const chatScrollRef = useRef<ScrollView>(null);
 
-  // Send Chat Message
-  const handleSendMessage = async () => {
-    const text = userInput.trim();
-    if (!text || isSending || !id) return;
-
-    setUserInput("");
-    setIsSending(true);
-
-    const userMsg: ChatMessage = {
-      id: Math.random().toString(36).substr(2, 9),
-      role: "user",
-      content: text,
-      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-    };
-
-    const newHistory = [...chatHistory, userMsg];
-    setChats(id, newHistory);
-    setTimeout(() => chatScrollRef.current?.scrollToEnd({ animated: true }), 100);
-
-    try {
+  // Send Chat Message Mutation
+  const chatMutation = useMutation({
+    mutationFn: async (text: string) => {
       const endpoint = `${N8N_URL}/webhook/chat`;
       const response = await fetch(endpoint, {
         method: "POST",
@@ -60,8 +43,9 @@ export default function ChatScreen() {
         throw new Error(`HTTP Error: ${response.status}`);
       }
 
-      const data = await response.json();
-      
+      return response.json();
+    },
+    onSuccess: (data, variables) => {
       let replyContent = "";
       if (Array.isArray(data) && data[0]) {
         replyContent = data[0].output || data[0].text || JSON.stringify(data[0]);
@@ -80,10 +64,13 @@ export default function ChatScreen() {
         timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       };
 
-      const finalHistory = [...newHistory, assistantMsg];
-      setChats(id, finalHistory);
-      
-    } catch (e: any) {
+      if (id) {
+        const currentHistory = chatsByProject[id] || [];
+        setChats(id, [...currentHistory, assistantMsg]);
+      }
+      setTimeout(() => chatScrollRef.current?.scrollToEnd({ animated: true }), 100);
+    },
+    onError: (e: any, variables) => {
       console.error("Chat error", e);
       const systemErrorMsg: ChatMessage = {
         id: Math.random().toString(36).substr(2, 9),
@@ -91,11 +78,32 @@ export default function ChatScreen() {
         content: `⚠️ Error de conexión: No se pudo contactar al servidor en ${N8N_URL}. Revisa que n8n esté corriendo y que tu dispositivo comparta la red.`,
         timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       };
-      setChats(id, [...newHistory, systemErrorMsg]);
-    } finally {
-      setIsSending(false);
+      if (id) {
+        const currentHistory = chatsByProject[id] || [];
+        setChats(id, [...currentHistory, systemErrorMsg]);
+      }
       setTimeout(() => chatScrollRef.current?.scrollToEnd({ animated: true }), 100);
-    }
+    },
+  });
+
+  const handleSendMessage = () => {
+    const text = userInput.trim();
+    if (!text || chatMutation.isPending || !id) return;
+
+    setUserInput("");
+
+    const userMsg: ChatMessage = {
+      id: Math.random().toString(36).substr(2, 9),
+      role: "user",
+      content: text,
+      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+    };
+
+    const newHistory = [...chatHistory, userMsg];
+    setChats(id, newHistory);
+    setTimeout(() => chatScrollRef.current?.scrollToEnd({ animated: true }), 100);
+
+    chatMutation.mutate(text);
   };
 
   // Clear Chat History
@@ -174,7 +182,7 @@ export default function ChatScreen() {
           )}
 
           {/* Typing indicator */}
-          {isSending && (
+          {chatMutation.isPending && (
             <View className="flex-row justify-start mb-4">
               <View className="bg-slate-800 border border-slate-700/50 rounded-2xl rounded-tl-none px-4 py-3.5 flex-row items-center gap-1.5">
                 <ActivityIndicator size="small" color="#6366f1" />
@@ -208,15 +216,15 @@ export default function ChatScreen() {
             />
             <TouchableOpacity
               onPress={handleSendMessage}
-              disabled={!userInput.trim() || isSending}
+              disabled={!userInput.trim() || chatMutation.isPending}
               className={`p-2 rounded-lg ${
-                userInput.trim() && !isSending ? "bg-indigo-600" : "bg-slate-700/40"
+                userInput.trim() && !chatMutation.isPending ? "bg-indigo-600" : "bg-slate-700/40"
               }`}
             >
               <Feather
                 name="arrow-up"
                 size={16}
-                color={userInput.trim() && !isSending ? "#fff" : "#475569"}
+                color={userInput.trim() && !chatMutation.isPending ? "#fff" : "#475569"}
               />
             </TouchableOpacity>
           </View>
