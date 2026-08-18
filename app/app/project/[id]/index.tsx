@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Text,
   View,
@@ -8,54 +8,23 @@ import {
   Alert,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as DocumentPicker from "expo-document-picker";
 import { useLocalSearchParams } from "expo-router";
 import { N8N_URL } from "../../../config";
-
-interface UploadedDocument {
-  id: string;
-  name: string;
-  size: number;
-  timestamp: string;
-}
+import { useAppStore, UploadedDocument } from "../../../store";
 
 export default function DocumentsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
 
   // Document Upload State
+  const documentsByProject = useAppStore((state) => state.documentsByProject);
+  const setDocuments = useAppStore((state) => state.setDocuments);
+  const uploadedDocs = (id ? documentsByProject[id] : []) || [];
+
+  // Document Upload State
   const [selectedFile, setSelectedFile] =
     useState<DocumentPicker.DocumentPickerAsset | null>(null);
   const [isUploading, setIsUploading] = useState(false);
-  const [uploadedDocs, setUploadedDocs] = useState<UploadedDocument[]>([]);
-
-  // Load project-specific documents on startup
-  useEffect(() => {
-    if (!id) return;
-
-    async function loadDocuments() {
-      try {
-        const storedDocs = await AsyncStorage.getItem(
-          `@rag_project_docs_${id}`,
-        );
-        if (storedDocs) {
-          setUploadedDocs(JSON.parse(storedDocs));
-        }
-      } catch (e) {
-        console.error("Error loading project documents", e);
-      }
-    }
-    loadDocuments();
-  }, [id]);
-
-  // Save data to storage helper
-  const saveToStorage = async (key: string, data: any) => {
-    try {
-      await AsyncStorage.setItem(key, JSON.stringify(data));
-    } catch (e) {
-      console.error(`Error saving data for key ${key}`, e);
-    }
-  };
 
   // Document Picker
   const handleSelectDocument = async () => {
@@ -110,8 +79,9 @@ export default function DocumentsScreen() {
       };
 
       const updatedDocs = [newDoc, ...uploadedDocs];
-      setUploadedDocs(updatedDocs);
-      await saveToStorage(`@rag_project_docs_${id}`, updatedDocs);
+      if (id) {
+        setDocuments(id, updatedDocs);
+      }
 
       setSelectedFile(null);
       Alert.alert(
@@ -130,7 +100,7 @@ export default function DocumentsScreen() {
   };
 
   // Clear Uploaded Files list
-  const handleClearDocsList = async () => {
+  const handleClearDocsList = () => {
     Alert.alert(
       "Confirmación",
       "¿Quieres limpiar la lista local de documentos de este proyecto? Esto no los borrará de la base de datos de n8n, solo los quitará de la vista en la app.",
@@ -139,10 +109,9 @@ export default function DocumentsScreen() {
         {
           text: "Limpiar",
           style: "destructive",
-          onPress: async () => {
-            setUploadedDocs([]);
+          onPress: () => {
             if (id) {
-              await AsyncStorage.removeItem(`@rag_project_docs_${id}`);
+              setDocuments(id, []);
             }
           },
         },

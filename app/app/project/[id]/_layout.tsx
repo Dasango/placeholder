@@ -1,42 +1,17 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, Platform } from "react-native";
+import React from "react";
+import { View, Text, TouchableOpacity } from "react-native";
 import { Tabs, useLocalSearchParams, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Feather, Ionicons } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-
-interface Project {
-  id: string;
-  name: string;
-  createdAt: string;
-}
+import { useAppStore } from "../../../store";
 
 export default function ProjectLayout() {
   const router = useRouter();
   const { id, name } = useLocalSearchParams<{ id: string; name: string }>();
-  const [projectName, setProjectName] = useState(
-    name || "Detalle del Proyecto",
-  );
+  const projects = useAppStore((state) => state.projects);
 
-  useEffect(() => {
-    if (!name && id) {
-      AsyncStorage.getItem("@rag_projects").then((stored) => {
-        if (stored) {
-          try {
-            const projs: Project[] = JSON.parse(stored);
-            const current = projs.find((p) => p.id === id);
-            if (current) {
-              setProjectName(current.name);
-            }
-          } catch (e) {
-            console.error("Error parsing projects in layout", e);
-          }
-        }
-      });
-    } else if (name) {
-      setProjectName(name);
-    }
-  }, [id, name]);
+  const currentProject = projects.find((p) => p.id === id);
+  const projectName = name || currentProject?.name || "Detalle del Proyecto";
 
   return (
     <SafeAreaView className="flex-1 bg-slate-900" edges={["top"]}>

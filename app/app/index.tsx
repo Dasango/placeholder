@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Text,
   View,
@@ -10,72 +10,19 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import { N8N_URL } from "../config";
-
-interface Project {
-  id: string;
-  name: string;
-  createdAt: string;
-}
-
-const STORAGE_KEYS = {
-  PROJECTS: "@rag_projects",
-};
+import { useAppStore, Project } from "../store";
 
 export default function Page() {
   const router = useRouter();
 
-  // Projects State
-  const [projects, setProjects] = useState<Project[]>([]);
+  const { projects, addProject, deleteProject } = useAppStore();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [newProjectName, setNewProjectName] = useState("");
 
-  // Load projects on startup
-  useEffect(() => {
-    async function loadProjects() {
-      try {
-        const storedProjects = await AsyncStorage.getItem(
-          STORAGE_KEYS.PROJECTS,
-        );
-        if (storedProjects) {
-          setProjects(JSON.parse(storedProjects));
-        } else {
-          // Add a default project if none exist
-          const defaultProject: Project = {
-            id: "default_project",
-            name: "Proyecto Ejemplo",
-            createdAt: new Date().toLocaleDateString(),
-          };
-          setProjects([defaultProject]);
-          await AsyncStorage.setItem(
-            STORAGE_KEYS.PROJECTS,
-            JSON.stringify([defaultProject]),
-          );
-        }
-      } catch (e) {
-        console.error("Error loading projects", e);
-      }
-    }
-    loadProjects();
-  }, []);
-
-  // Save projects helper
-  const saveProjects = async (updatedProjects: Project[]) => {
-    try {
-      await AsyncStorage.setItem(
-        STORAGE_KEYS.PROJECTS,
-        JSON.stringify(updatedProjects),
-      );
-      setProjects(updatedProjects);
-    } catch (e) {
-      console.error("Error saving projects", e);
-    }
-  };
-
   // Create Project
-  const handleCreateProject = async () => {
+  const handleCreateProject = () => {
     const nameTrim = newProjectName.trim();
     if (!nameTrim) return;
 
@@ -85,8 +32,7 @@ export default function Page() {
       createdAt: new Date().toLocaleDateString(),
     };
 
-    const updated = [...projects, newProj];
-    await saveProjects(updated);
+    addProject(newProj);
 
     setNewProjectName("");
     setIsCreateOpen(false);
@@ -108,13 +54,8 @@ export default function Page() {
         {
           text: "Eliminar",
           style: "destructive",
-          onPress: async () => {
-            const updated = projects.filter((p) => p.id !== projectId);
-            await saveProjects(updated);
-
-            // Clean up project-specific storage
-            await AsyncStorage.removeItem(`@rag_project_docs_${projectId}`);
-            await AsyncStorage.removeItem(`@rag_project_chat_${projectId}`);
+          onPress: () => {
+            deleteProject(projectId);
           },
         },
       ],

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef } from "react";
 import {
   Text,
   View,
@@ -11,52 +11,21 @@ import {
   KeyboardAvoidingView,
 } from "react-native";
 import { Feather, Ionicons } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useLocalSearchParams } from "expo-router";
 import { N8N_URL } from "../../../config";
-
-interface ChatMessage {
-  id: string;
-  role: "user" | "assistant";
-  content: string;
-  timestamp: string;
-}
+import { useAppStore, ChatMessage } from "../../../store";
 
 export default function ChatScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
 
-  // Chat State
-  const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
+  const chatsByProject = useAppStore((state) => state.chatsByProject);
+  const setChats = useAppStore((state) => state.setChats);
+  const chatHistory = (id ? chatsByProject[id] : []) || [];
+
   const [userInput, setUserInput] = useState("");
   const [isSending, setIsSending] = useState(false);
 
   const chatScrollRef = useRef<ScrollView>(null);
-
-  // Load project-specific chat on startup
-  useEffect(() => {
-    if (!id) return;
-    
-    async function loadChat() {
-      try {
-        const storedChat = await AsyncStorage.getItem(`@rag_project_chat_${id}`);
-        if (storedChat) {
-          setChatHistory(JSON.parse(storedChat));
-        }
-      } catch (e) {
-        console.error("Error loading project chat", e);
-      }
-    }
-    loadChat();
-  }, [id]);
-
-  // Save data to storage helper
-  const saveToStorage = async (key: string, data: any) => {
-    try {
-      await AsyncStorage.setItem(key, JSON.stringify(data));
-    } catch (e) {
-      console.error(`Error saving data for key ${key}`, e);
-    }
-  };
 
   // Send Chat Message
   const handleSendMessage = async () => {
@@ -74,7 +43,7 @@ export default function ChatScreen() {
     };
 
     const newHistory = [...chatHistory, userMsg];
-    setChatHistory(newHistory);
+    setChats(id, newHistory);
     setTimeout(() => chatScrollRef.current?.scrollToEnd({ animated: true }), 100);
 
     try {
@@ -112,8 +81,7 @@ export default function ChatScreen() {
       };
 
       const finalHistory = [...newHistory, assistantMsg];
-      setChatHistory(finalHistory);
-      await saveToStorage(`@rag_project_chat_${id}`, finalHistory);
+      setChats(id, finalHistory);
       
     } catch (e: any) {
       console.error("Chat error", e);
@@ -123,7 +91,7 @@ export default function ChatScreen() {
         content: `⚠️ Error de conexión: No se pudo contactar al servidor en ${N8N_URL}. Revisa que n8n esté corriendo y que tu dispositivo comparta la red.`,
         timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       };
-      setChatHistory([...newHistory, systemErrorMsg]);
+      setChats(id, [...newHistory, systemErrorMsg]);
     } finally {
       setIsSending(false);
       setTimeout(() => chatScrollRef.current?.scrollToEnd({ animated: true }), 100);
@@ -131,16 +99,15 @@ export default function ChatScreen() {
   };
 
   // Clear Chat History
-  const handleClearChat = async () => {
+  const handleClearChat = () => {
     Alert.alert("Confirmación", "¿Quieres borrar el historial de chat de este proyecto?", [
       { text: "Cancelar", style: "cancel" },
       {
         text: "Borrar",
         style: "destructive",
-        onPress: async () => {
-          setChatHistory([]);
+        onPress: () => {
           if (id) {
-            await AsyncStorage.removeItem(`@rag_project_chat_${id}`);
+            setChats(id, []);
           }
         },
       },
