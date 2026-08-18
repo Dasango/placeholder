@@ -46,6 +46,10 @@
               {
                 "name": "project_id",
                 "value": "={{ $('Upload your file here').item.json.body.projectId }}"
+              },
+              {
+                "name": "file_name",
+                "value": "={{ $('Upload your file here').item.binary.data.fileName }}"
               }
             ]
           }
@@ -230,13 +234,133 @@
       "name": "Sticky Note3",
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        992,
-        864
+        1376,
+        544
       ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "### Delete Project Data Flow\nThis flow deletes all document vector embeddings associated with a project when the project is deleted in the app.",
+        "height": 200,
+        "width": 444,
+        "color": 6
+      },
+      "id": "b7925fed-bb4a-4e12-ae2b-43a4d313bee1",
+      "name": "Sticky Note4",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        0,
+        512
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "delete-project",
+        "options": {}
+      },
+      "id": "025b4cd5-ac1b-4a93-b1ea-447e594b46b0",
+      "name": "Delete project documents webhook",
+      "type": "n8n-nodes-base.webhook",
+      "position": [
+        544,
+        592
+      ],
+      "webhookId": "92b72e05-87d8-4b64-b3ca-b3391a2e8bd8",
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "content": "Delete Flow",
+        "height": 300,
+        "width": 472,
+        "color": 7
+      },
+      "id": "7da20246-2921-4e95-90ae-c68aefc75d6f",
+      "name": "Sticky Note5",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        480,
+        528
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "additionalFields": null,
+        "operation": "executeQuery",
+        "query": "DELETE FROM n8n_vectors WHERE metadata->>'project_id' = '{{ $json.body.projectId }}';"
+      },
+      "id": "3f4278ea-4b20-425e-a00c-9a10ab57c78d",
+      "name": "Execute a SQL query",
+      "type": "n8n-nodes-base.postgres",
+      "position": [
+        752,
+        592
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "4qxHiAVYzK1kbOQR",
+          "name": "Postgres account"
+        }
+      },
+      "typeVersion": 2.6
+    },
+    {
+      "parameters": {
+        "content": "### Delete Single Document Flow\nThis flow deletes all vector chunks of a specific document within a project.",
+        "height": 200,
+        "width": 380,
+        "color": 6
+      },
+      "id": "b74ff77e-3012-48cc-a3d4-e860e2f9c941",
+      "name": "Sticky Note6",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        480,
+        720
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "delete-document",
+        "options": {}
+      },
+      "id": "08f2f5b4-6eb9-4cb5-9b10-e8ca2a08f1cf",
+      "name": "Delete document webhook",
+      "type": "n8n-nodes-base.webhook",
+      "position": [
+        544,
+        800
+      ],
+      "webhookId": "361bc062-ba21-4fad-83b4-ca22b370b904",
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "DELETE FROM n8n_vectors WHERE metadata->>'project_id' = '{{ $json.body.projectId }}' AND metadata->>'file_name' = '{{ $json.body.documentName }}';"
+      },
+      "id": "005970e4-4004-4d53-bdc6-498530f3ce49",
+      "name": "Delete single document from DB",
+      "type": "n8n-nodes-base.postgres",
+      "position": [
+        750,
+        800
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "4qxHiAVYzK1kbOQR",
+          "name": "Postgres account"
+        }
+      },
       "typeVersion": 1
     }
   ],
-  "pinData": {},
   "connections": {
     "Query Data Tool": {
       "ai_tool": [
@@ -308,20 +432,38 @@
           }
         ]
       ]
+    },
+    "Delete project documents webhook": {
+      "main": [
+        [
+          {
+            "node": "Execute a SQL query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete document webhook": {
+      "main": [
+        [
+          {
+            "node": "Delete single document from DB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "active": true,
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "6e3f2ea3-3440-4075-97d4-29c2af7a160c",
   "meta": {
-    "templateCredsSetupCompleted": true,
-    "instanceId": "923db07cd4c9ca6fb0f3c907af115c67f9c3a22ed9c310bab7739bb018b68fd7"
+    "templateCredsSetupCompleted": true
   },
   "nodeGroups": [],
-  "id": "dVZdFnMRXSh5yTJ2",
-  "tags": []
+  "id": "dVZdFnMRXSh5yTJ2"
 }

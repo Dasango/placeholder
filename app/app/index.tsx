@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import {
-  Text,
   View,
   TextInput,
   TouchableOpacity,
@@ -13,6 +12,8 @@ import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { N8N_URL } from "../config";
 import { useAppStore, Project } from "../store";
+import { Button } from "@/components/ui/button";
+import { Text } from "@/components/ui/text";
 
 export default function Page() {
   const router = useRouter();
@@ -48,13 +49,39 @@ export default function Page() {
   const handleDeleteProject = (projectId: string, projectName: string) => {
     Alert.alert(
       "Confirmación",
-      `¿Estás seguro de que quieres eliminar el proyecto "${projectName}"? Esto borrará localmente su historial de chat y documentos.`,
+      `¿Estás seguro de que quieres eliminar el proyecto "${projectName}"? Esto borrará permanentemente sus documentos de la base de datos y localmente su historial de chat.`,
       [
         { text: "Cancelar", style: "cancel" },
         {
           text: "Eliminar",
           style: "destructive",
-          onPress: () => {
+          onPress: async () => {
+            try {
+              // Intentar borrar los documentos vectorizados de la base de datos en n8n
+              const response = await fetch(
+                `${N8N_URL}/webhook/delete-project`,
+                {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({ projectId }),
+                },
+              );
+
+              if (!response.ok) {
+                console.warn(
+                  `Error al intentar borrar documentos en n8n: ${response.status}`,
+                );
+              }
+            } catch (error) {
+              console.error(
+                "Error al conectar con n8n para eliminar documentos:",
+                error,
+              );
+            }
+
+            // Eliminar el proyecto de forma local
             deleteProject(projectId);
           },
         },
@@ -63,143 +90,18 @@ export default function Page() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-slate-900">
-      {/* Header bar */}
-      <View className="px-6 py-4 flex-row justify-between items-center bg-slate-800/60 border-b border-slate-700/50">
-        <View className="flex-row items-center gap-2">
-          <View className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-          <Text className="text-white text-lg font-bold">
-            Mis Notebooks RAG
-          </Text>
-        </View>
-        <TouchableOpacity
-          onPress={() => setIsCreateOpen(true)}
-          className="flex-row items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-600 active:bg-indigo-700"
-        >
-          <Feather name="plus" size={16} color="#fff" />
-          <Text className="text-white text-sm font-semibold">Nuevo</Text>
-        </TouchableOpacity>
-      </View>
-
-      <ScrollView className="flex-1 px-6 py-4">
-        <Text className="text-slate-400 text-sm mb-6 leading-relaxed">
-          Crea proyectos temáticos similares a Google Notebook. Dentro de cada
-          proyecto podrás cargar documentos independientes e iniciar
-          conversaciones contextualizadas con la IA.
-        </Text>
-
-        {/* Projects List */}
-        <View className="mb-8">
-          <Text className="text-white font-bold text-base mb-4">
-            Proyectos Disponibles
-          </Text>
-
-          {projects.length === 0 ? (
-            <View className="py-12 justify-center items-center bg-slate-800/20 rounded-2xl border border-slate-800">
-              <Feather name="book-open" size={40} color="#475569" />
-              <Text className="text-slate-500 text-sm mt-3">
-                No hay proyectos creados aún
-              </Text>
-              <TouchableOpacity
-                onPress={() => setIsCreateOpen(true)}
-                className="mt-4 px-4 py-2 rounded-xl bg-slate-800 border border-slate-700 active:bg-slate-700"
-              >
-                <Text className="text-white text-xs font-semibold">
-                  Crear un proyecto ahora
-                </Text>
-              </TouchableOpacity>
-            </View>
-          ) : (
-            projects.map((proj) => (
-              <TouchableOpacity
-                key={proj.id}
-                onPress={() =>
-                  router.push({
-                    pathname: "/project/[id]",
-                    params: { id: proj.id, name: proj.name },
-                  })
-                }
-                className="flex-row items-center justify-between p-4 bg-slate-800/40 rounded-2xl mb-3 border border-slate-800 active:bg-slate-800"
-              >
-                <View className="flex-row items-center flex-1 mr-3">
-                  <View className="p-3 bg-indigo-900/30 rounded-xl mr-3">
-                    <Feather name="folder" size={20} color="#818cf8" />
-                  </View>
-                  <View className="flex-1">
-                    <Text
-                      className="text-slate-100 text-sm font-semibold"
-                      numberOfLines={1}
-                    >
-                      {proj.name}
-                    </Text>
-                    <Text className="text-slate-500 text-xs mt-0.5">
-                      Creado: {proj.createdAt}
-                    </Text>
-                  </View>
-                </View>
-
-                <TouchableOpacity
-                  onPress={() => handleDeleteProject(proj.id, proj.name)}
-                  className="p-2.5 rounded-xl bg-slate-800/60 active:bg-red-950/40 border border-slate-700/30"
-                >
-                  <Feather name="trash-2" size={16} color="#ef4444" />
-                </TouchableOpacity>
-              </TouchableOpacity>
-            ))
-          )}
-        </View>
-      </ScrollView>
-
-      {/* Network Status Badge (No Config Modal anymore) */}
-      <View className="px-6 py-3 bg-slate-950 border-t border-slate-850 flex-row items-center justify-center gap-1.5">
-        <View className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-        <Text className="text-slate-500 text-[11px] font-medium">
-          Conectado a: {N8N_URL}
-        </Text>
-      </View>
-
-      {/* Create Project Modal */}
-      <Modal
-        visible={isCreateOpen}
-        animationType="fade"
-        transparent={true}
-        onRequestClose={() => setIsCreateOpen(false)}
+    <SafeAreaView className="flex-1">
+      <Button
+        className="bg-blue-500"
+        onPress={() =>
+          router.push({
+            pathname: "/project/[id]",
+            params: { id: "test", name: "Proyecto de prueba" },
+          })
+        }
       >
-        <View className="flex-1 bg-black/75 justify-center items-center px-6">
-          <View className="bg-slate-800 border border-slate-700 rounded-2xl p-6 w-full max-w-sm">
-            <View className="flex-row justify-between items-center mb-4">
-              <Text className="text-white text-lg font-bold">
-                Crear Nuevo Proyecto
-              </Text>
-              <TouchableOpacity onPress={() => setIsCreateOpen(false)}>
-                <Feather name="x" size={20} color="#94a3b8" />
-              </TouchableOpacity>
-            </View>
-
-            <Text className="text-slate-400 text-xs mb-4">
-              Asigna un nombre descriptivo a tu notebook. Podrás cambiar o
-              agregar documentos más tarde.
-            </Text>
-
-            <TextInput
-              value={newProjectName}
-              onChangeText={setNewProjectName}
-              placeholder="Nombre del notebook (ej. Tesis, Finanzas)..."
-              placeholderTextColor="#475569"
-              className="bg-slate-900 border border-slate-700 rounded-xl p-3 text-white text-sm mb-6"
-              autoFocus
-              onSubmitEditing={handleCreateProject}
-            />
-
-            <TouchableOpacity
-              onPress={handleCreateProject}
-              className="bg-indigo-600 py-3 rounded-xl justify-center items-center active:bg-indigo-700"
-            >
-              <Text className="text-white font-semibold">Crear Notebook</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+        <Text className="text-white">Ir a proyecto</Text>
+      </Button>
     </SafeAreaView>
   );
 }

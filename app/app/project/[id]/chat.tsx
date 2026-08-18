@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   Text,
   View,
@@ -9,6 +9,7 @@ import {
   Alert,
   Platform,
   KeyboardAvoidingView,
+  Keyboard,
 } from "react-native";
 import { Feather, Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
@@ -24,6 +25,20 @@ export default function ChatScreen() {
   const chatHistory = (id ? chatsByProject[id] : []) || [];
 
   const [userInput, setUserInput] = useState("");
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+
+  useEffect(() => {
+    const showSub = Keyboard.addListener("keyboardDidShow", (e) => {
+      setKeyboardHeight(e.endCoordinates.height);
+    });
+    const hideSub = Keyboard.addListener("keyboardDidHide", () => {
+      setKeyboardHeight(0);
+    });
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
 
   const chatScrollRef = useRef<ScrollView>(null);
 
@@ -124,11 +139,14 @@ export default function ChatScreen() {
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
       className="flex-1 bg-slate-900"
-      keyboardVerticalOffset={Platform.OS === "ios" ? 110 : 80}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 110 : 0}
     >
-      <View className="flex-1">
+      <View
+        className="flex-1"
+        style={Platform.OS === "android" ? { paddingBottom: keyboardHeight } : undefined}
+      >
         <ScrollView
           ref={chatScrollRef}
           className="flex-1 px-4 py-2"

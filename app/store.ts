@@ -84,6 +84,6 @@ export const useAppStore = create<AppState>()(
     {
       name: "rag-app-storage",
       storage: createJSONStorage(() => AsyncStorage),
-    }
-  )
+    },
+  ),
 );

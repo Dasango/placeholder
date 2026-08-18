@@ -122,6 +122,50 @@ export default function DocumentsScreen() {
     );
   };
 
+  // Delete individual document
+  const handleDeleteDoc = (docId: string, docName: string) => {
+    Alert.alert(
+      "Confirmación",
+      `¿Estás seguro de que quieres eliminar el documento "${docName}"? Esto lo borrará de la base de datos de n8n y de la app.`,
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Eliminar",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              // Intentar borrar los documentos vectorizados de la base de datos en n8n
+              const response = await fetch(`${N8N_URL}/webhook/delete-document`, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  projectId: id,
+                  documentName: docName,
+                }),
+              });
+
+              if (!response.ok) {
+                console.warn(`Error al intentar borrar el documento en n8n: ${response.status}`);
+              }
+            } catch (error) {
+              console.error("Error al conectar con n8n para eliminar el documento:", error);
+            }
+
+            // Eliminar de forma local en Zustand y AsyncStorage
+            if (id) {
+              setDocuments(
+                id,
+                uploadedDocs.filter((d) => d.id !== docId),
+              );
+            }
+          },
+        },
+      ],
+    );
+  };
+
   const formatBytes = (bytes: number) => {
     if (bytes === 0) return "0 Bytes";
     const k = 1024;
@@ -252,10 +296,18 @@ export default function DocumentsScreen() {
                       </Text>
                     </View>
                   </View>
-                  <View className="px-2 py-0.5 bg-emerald-950 rounded-full border border-emerald-900">
-                    <Text className="text-emerald-400 text-[10px] font-semibold">
-                      Aislado
-                    </Text>
+                  <View className="flex-row items-center gap-2">
+                    <View className="px-2 py-0.5 bg-emerald-950 rounded-full border border-emerald-900">
+                      <Text className="text-emerald-400 text-[10px] font-semibold">
+                        Aislado
+                      </Text>
+                    </View>
+                    <TouchableOpacity
+                      onPress={() => handleDeleteDoc(doc.id, doc.name)}
+                      className="p-1.5 rounded-lg bg-slate-800 border border-slate-700/60"
+                    >
+                      <Feather name="trash-2" size={14} color="#f87171" />
+                    </TouchableOpacity>
                   </View>
                 </View>
               ))

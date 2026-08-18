@@ -14,39 +14,14 @@ export default function ProjectLayout() {
   const projectName = name || currentProject?.name || "Detalle del Proyecto";
 
   return (
-    <SafeAreaView className="flex-1 bg-slate-900" edges={["top"]}>
-      {/* Header Bar */}
-      <View className="px-6 py-4 flex-row items-center bg-slate-800/60 border-b border-slate-700/50">
-        <TouchableOpacity
-          onPress={() => router.back()}
-          className="p-2 -ml-2 mr-3 rounded-lg bg-slate-700/30 active:bg-slate-700/60"
-        >
-          <Feather name="arrow-left" size={20} color="#fff" />
-        </TouchableOpacity>
-        <View className="flex-1">
-          <Text className="text-white text-lg font-bold" numberOfLines={1}>
-            {projectName}
-          </Text>
-          <Text className="text-slate-400 text-xs mt-0.5">
-            NotebookLM RAG Local
-          </Text>
-        </View>
-      </View>
-
+    <SafeAreaView className="flex-1 bg-slate-900">
       <Tabs
         screenOptions={{
           headerShown: false,
-          tabBarStyle: {
-            backgroundColor: "#1e293b", // slate-800
-            borderTopColor: "rgba(51, 65, 85, 0.5)", // slate-700/50
-          },
-          tabBarActiveTintColor: "#818cf8", // indigo-400
-          tabBarInactiveTintColor: "#64748b", // slate-500
-          tabBarLabelStyle: {
-            fontSize: 12,
-            fontWeight: "600",
-          },
           tabBarHideOnKeyboard: true,
+          tabBarVisibilityAnimationConfig: {
+            show: { animation: "timing", config: { duration: 0 } },
+          },
         }}
       >
         <Tabs.Screen
