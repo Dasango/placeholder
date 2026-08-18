@@ -13,7 +13,7 @@ import {
 import { Feather, Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useLocalSearchParams } from "expo-router";
-import Constants from "expo-constants";
+import { N8N_URL } from "../../../config";
 
 interface ChatMessage {
   id: string;
@@ -25,30 +25,12 @@ interface ChatMessage {
 export default function ChatScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
 
-  // Configuration (auto-detected)
-  const [n8nUrl, setN8nUrl] = useState("http://localhost:5678");
-
   // Chat State
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [userInput, setUserInput] = useState("");
   const [isSending, setIsSending] = useState(false);
 
   const chatScrollRef = useRef<ScrollView>(null);
-
-  // Auto-detect backend URL using expo hostUri
-  useEffect(() => {
-    const hostUri = Constants.expoConfig?.hostUri;
-    if (hostUri) {
-      const ip = hostUri.split(":")[0];
-      setN8nUrl(`http://${ip}:5678`);
-    } else {
-      const defaultUrl = Platform.select({
-        android: "http://10.0.2.2:5678",
-        default: "http://localhost:5678",
-      }) || "http://localhost:5678";
-      setN8nUrl(defaultUrl);
-    }
-  }, []);
 
   // Load project-specific chat on startup
   useEffect(() => {
@@ -96,7 +78,7 @@ export default function ChatScreen() {
     setTimeout(() => chatScrollRef.current?.scrollToEnd({ animated: true }), 100);
 
     try {
-      const endpoint = `${n8nUrl}/webhook/chat`;
+      const endpoint = `${N8N_URL}/webhook/chat`;
       const response = await fetch(endpoint, {
         method: "POST",
         headers: {
@@ -138,7 +120,7 @@ export default function ChatScreen() {
       const systemErrorMsg: ChatMessage = {
         id: Math.random().toString(36).substr(2, 9),
         role: "assistant",
-        content: `⚠️ Error de conexión: No se pudo contactar al servidor en ${n8nUrl}. Revisa que n8n esté corriendo y que tu dispositivo comparta la red.`,
+        content: `⚠️ Error de conexión: No se pudo contactar al servidor en ${N8N_URL}. Revisa que n8n esté corriendo y que tu dispositivo comparta la red.`,
         timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       };
       setChatHistory([...newHistory, systemErrorMsg]);

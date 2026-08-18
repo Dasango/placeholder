@@ -6,13 +6,12 @@ import {
   ScrollView,
   ActivityIndicator,
   Alert,
-  Platform,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as DocumentPicker from "expo-document-picker";
 import { useLocalSearchParams } from "expo-router";
-import Constants from "expo-constants";
+import { N8N_URL } from "../../../config";
 
 interface UploadedDocument {
   id: string;
@@ -24,30 +23,11 @@ interface UploadedDocument {
 export default function DocumentsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
 
-  // Configuration (auto-detected)
-  const [n8nUrl, setN8nUrl] = useState("http://localhost:5678");
-
   // Document Upload State
   const [selectedFile, setSelectedFile] =
     useState<DocumentPicker.DocumentPickerAsset | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadedDocs, setUploadedDocs] = useState<UploadedDocument[]>([]);
-
-  // Auto-detect backend URL using expo hostUri
-  useEffect(() => {
-    const hostUri = Constants.expoConfig?.hostUri;
-    if (hostUri) {
-      const ip = hostUri.split(":")[0];
-      setN8nUrl(`http://${ip}:5678`);
-    } else {
-      const defaultUrl =
-        Platform.select({
-          android: "http://10.0.2.2:5678",
-          default: "http://localhost:5678",
-        }) || "http://localhost:5678";
-      setN8nUrl(defaultUrl);
-    }
-  }, []);
 
   // Load project-specific documents on startup
   useEffect(() => {
@@ -108,7 +88,7 @@ export default function DocumentsScreen() {
       } as any);
       formData.append("projectId", id);
 
-      const endpoint = `${n8nUrl}/webhook/upload-pdf`;
+      const endpoint = `${N8N_URL}/webhook/upload-pdf`;
       const response = await fetch(endpoint, {
         method: "POST",
         body: formData,
@@ -142,7 +122,7 @@ export default function DocumentsScreen() {
       console.error("Upload error", e);
       Alert.alert(
         "Fallo de conexión",
-        `No se pudo conectar al backend en ${n8nUrl}.\n\nDetalles: ${e.message}\n\nAsegúrate de que n8n esté corriendo y que tu dispositivo esté en la misma red.`,
+        `No se pudo conectar al backend en ${N8N_URL}.\n\nDetalles: ${e.message}\n\nAsegúrate de que n8n esté corriendo y que tu dispositivo esté en la misma red.`,
       );
     } finally {
       setIsUploading(false);

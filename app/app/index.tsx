@@ -6,14 +6,13 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
-  Platform,
   Modal,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Feather, Ionicons } from "@expo/vector-icons";
+import { Feather } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
-import Constants from "expo-constants";
+import { N8N_URL } from "../config";
 
 interface Project {
   id: string;
@@ -28,34 +27,18 @@ const STORAGE_KEYS = {
 export default function Page() {
   const router = useRouter();
 
-  // Configuration (auto-detected)
-  const [n8nUrl, setN8nUrl] = useState("http://localhost:5678");
-
   // Projects State
   const [projects, setProjects] = useState<Project[]>([]);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [newProjectName, setNewProjectName] = useState("");
 
-  // Auto-detect backend URL using expo hostUri
-  useEffect(() => {
-    const hostUri = Constants.expoConfig?.hostUri;
-    if (hostUri) {
-      const ip = hostUri.split(":")[0];
-      setN8nUrl(`http://${ip}:5678`);
-    } else {
-      const defaultUrl = Platform.select({
-        android: "http://10.0.2.2:5678",
-        default: "http://localhost:5678",
-      }) || "http://localhost:5678";
-      setN8nUrl(defaultUrl);
-    }
-  }, []);
-
   // Load projects on startup
   useEffect(() => {
     async function loadProjects() {
       try {
-        const storedProjects = await AsyncStorage.getItem(STORAGE_KEYS.PROJECTS);
+        const storedProjects = await AsyncStorage.getItem(
+          STORAGE_KEYS.PROJECTS,
+        );
         if (storedProjects) {
           setProjects(JSON.parse(storedProjects));
         } else {
@@ -66,7 +49,10 @@ export default function Page() {
             createdAt: new Date().toLocaleDateString(),
           };
           setProjects([defaultProject]);
-          await AsyncStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify([defaultProject]));
+          await AsyncStorage.setItem(
+            STORAGE_KEYS.PROJECTS,
+            JSON.stringify([defaultProject]),
+          );
         }
       } catch (e) {
         console.error("Error loading projects", e);
@@ -78,7 +64,10 @@ export default function Page() {
   // Save projects helper
   const saveProjects = async (updatedProjects: Project[]) => {
     try {
-      await AsyncStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify(updatedProjects));
+      await AsyncStorage.setItem(
+        STORAGE_KEYS.PROJECTS,
+        JSON.stringify(updatedProjects),
+      );
       setProjects(updatedProjects);
     } catch (e) {
       console.error("Error saving projects", e);
@@ -98,10 +87,10 @@ export default function Page() {
 
     const updated = [...projects, newProj];
     await saveProjects(updated);
-    
+
     setNewProjectName("");
     setIsCreateOpen(false);
-    
+
     // Auto-navigate to the new project
     router.push({
       pathname: "/project/[id]",
@@ -128,7 +117,7 @@ export default function Page() {
             await AsyncStorage.removeItem(`@rag_project_chat_${projectId}`);
           },
         },
-      ]
+      ],
     );
   };
 
@@ -138,7 +127,9 @@ export default function Page() {
       <View className="px-6 py-4 flex-row justify-between items-center bg-slate-800/60 border-b border-slate-700/50">
         <View className="flex-row items-center gap-2">
           <View className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-          <Text className="text-white text-lg font-bold">Mis Notebooks RAG</Text>
+          <Text className="text-white text-lg font-bold">
+            Mis Notebooks RAG
+          </Text>
         </View>
         <TouchableOpacity
           onPress={() => setIsCreateOpen(true)}
@@ -151,22 +142,30 @@ export default function Page() {
 
       <ScrollView className="flex-1 px-6 py-4">
         <Text className="text-slate-400 text-sm mb-6 leading-relaxed">
-          Crea proyectos temáticos similares a Google Notebook. Dentro de cada proyecto podrás cargar documentos independientes e iniciar conversaciones contextualizadas con la IA.
+          Crea proyectos temáticos similares a Google Notebook. Dentro de cada
+          proyecto podrás cargar documentos independientes e iniciar
+          conversaciones contextualizadas con la IA.
         </Text>
 
         {/* Projects List */}
         <View className="mb-8">
-          <Text className="text-white font-bold text-base mb-4">Proyectos Disponibles</Text>
+          <Text className="text-white font-bold text-base mb-4">
+            Proyectos Disponibles
+          </Text>
 
           {projects.length === 0 ? (
             <View className="py-12 justify-center items-center bg-slate-800/20 rounded-2xl border border-slate-800">
               <Feather name="book-open" size={40} color="#475569" />
-              <Text className="text-slate-500 text-sm mt-3">No hay proyectos creados aún</Text>
+              <Text className="text-slate-500 text-sm mt-3">
+                No hay proyectos creados aún
+              </Text>
               <TouchableOpacity
                 onPress={() => setIsCreateOpen(true)}
                 className="mt-4 px-4 py-2 rounded-xl bg-slate-800 border border-slate-700 active:bg-slate-700"
               >
-                <Text className="text-white text-xs font-semibold">Crear un proyecto ahora</Text>
+                <Text className="text-white text-xs font-semibold">
+                  Crear un proyecto ahora
+                </Text>
               </TouchableOpacity>
             </View>
           ) : (
@@ -186,7 +185,10 @@ export default function Page() {
                     <Feather name="folder" size={20} color="#818cf8" />
                   </View>
                   <View className="flex-1">
-                    <Text className="text-slate-100 text-sm font-semibold" numberOfLines={1}>
+                    <Text
+                      className="text-slate-100 text-sm font-semibold"
+                      numberOfLines={1}
+                    >
                       {proj.name}
                     </Text>
                     <Text className="text-slate-500 text-xs mt-0.5">
@@ -194,7 +196,7 @@ export default function Page() {
                     </Text>
                   </View>
                 </View>
-                
+
                 <TouchableOpacity
                   onPress={() => handleDeleteProject(proj.id, proj.name)}
                   className="p-2.5 rounded-xl bg-slate-800/60 active:bg-red-950/40 border border-slate-700/30"
@@ -211,7 +213,7 @@ export default function Page() {
       <View className="px-6 py-3 bg-slate-950 border-t border-slate-850 flex-row items-center justify-center gap-1.5">
         <View className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
         <Text className="text-slate-500 text-[11px] font-medium">
-          Conectado localmente a: {n8nUrl}
+          Conectado a: {N8N_URL}
         </Text>
       </View>
 
@@ -225,14 +227,17 @@ export default function Page() {
         <View className="flex-1 bg-black/75 justify-center items-center px-6">
           <View className="bg-slate-800 border border-slate-700 rounded-2xl p-6 w-full max-w-sm">
             <View className="flex-row justify-between items-center mb-4">
-              <Text className="text-white text-lg font-bold">Crear Nuevo Proyecto</Text>
+              <Text className="text-white text-lg font-bold">
+                Crear Nuevo Proyecto
+              </Text>
               <TouchableOpacity onPress={() => setIsCreateOpen(false)}>
                 <Feather name="x" size={20} color="#94a3b8" />
               </TouchableOpacity>
             </View>
 
             <Text className="text-slate-400 text-xs mb-4">
-              Asigna un nombre descriptivo a tu notebook. Podrás cambiar o agregar documentos más tarde.
+              Asigna un nombre descriptivo a tu notebook. Podrás cambiar o
+              agregar documentos más tarde.
             </Text>
 
             <TextInput
