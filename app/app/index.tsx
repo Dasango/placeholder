@@ -1,218 +1,160 @@
 import React, { useState } from "react";
-import { View, ScrollView, TextInput, Alert, TouchableOpacity } from "react-native";
+import { View, ScrollView, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
-import { useAppStore, Project } from "../store";
-import { useAppTheme } from "../hooks/useAppTheme";
-import { useConnectionCheck, useDeleteProjectFiles } from "../services/queries";
+import { useColorScheme } from "nativewind";
+import { useProjects } from "../hooks/useProjects";
+
+// Compound Components & Modals
+import { ConnectionBanner } from "../components/ConnectionBanner";
+import { NewProjectDialog } from "../components/NewProjectDialog";
+import { ProjectCard } from "../components/ProjectCard";
+import { ConfirmationDialog } from "../components/ConfirmationDialog";
+import { AlertDialog } from "../components/AlertDialog";
+
+// UI Primitives & Icons
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
+import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Icon } from "@/components/ui/icon";
-import { Plus, Trash2, BookOpen, AlertCircle, WifiOff } from "lucide-react-native";
+import { Plus, Sun, Moon, BookOpen } from "lucide-react-native";
 
 export default function Page() {
   const router = useRouter();
-  const { colors, isDark } = useAppTheme();
 
-  // Zustand State
-  const projects = useAppStore((state) => state.projects);
-  const addProject = useAppStore((state) => state.addProject);
-  const deleteProject = useAppStore((state) => state.deleteProject);
+  // NativeWind Theme
+  const { colorScheme, setColorScheme } = useColorScheme();
+  const isDark = colorScheme === "dark";
 
-  // Connection Check Query
-  const { data: isConnected, isLoading: isCheckingConnection } = useConnectionCheck();
-
-  // Backend Project Deletion Mutation
-  const deleteProjectFilesMutation = useDeleteProjectFiles();
+  // Business logic hook (No Zustand/queries inside app/app/)
+  const {
+    projects,
+    isBackendOnline,
+    isConfirmOpen,
+    setIsConfirmOpen,
+    projectToDelete,
+    isAlertOpen,
+    setIsAlertOpen,
+    alertInfo,
+    triggerAlert,
+    handleAddNewProject,
+    handleDeletePress,
+    confirmDelete,
+  } = useProjects();
 
   // Dialog State
-  const [newProjectName, setNewProjectName] = useState("");
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isNewProjectOpen, setIsNewProjectOpen] = useState(false);
 
-  const handleCreateProject = () => {
-    const name = newProjectName.trim();
-    if (!name) {
-      Alert.alert("Error", "El nombre del proyecto no puede estar vacío.");
-      return;
-    }
-
-    const newProject: Project = {
-      id: Math.random().toString(36).substring(2, 11),
-      name,
-      createdAt: new Date().toLocaleDateString(),
-    };
-
-    addProject(newProject);
-    setNewProjectName("");
-    setIsDialogOpen(false);
-  };
-
-  const handleDeleteProject = (projectId: string, name: string) => {
-    Alert.alert(
-      "Eliminar Proyecto",
-      `¿Estás seguro de que quieres eliminar el proyecto "${name}"? Esto borrará todos sus documentos y chat asociados, tanto en la app como en la base de datos vectorial del RAG.`,
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Eliminar",
-          style: "destructive",
-          onPress: async () => {
-            // Delete locally in Zustand
-            deleteProject(projectId);
-            // Delete vector embeddings in n8n/Postgres
-            try {
-              await deleteProjectFilesMutation.mutateAsync(projectId);
-            } catch (error) {
-              console.error("Failed to delete project vector files in backend:", error);
-            }
-          },
-        },
-      ]
-    );
+  const toggleTheme = () => {
+    setColorScheme(isDark ? "light" : "dark");
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
-      <ScrollView contentContainerStyle={{ padding: 24, gap: 24 }}>
-        
-        {/* Connection Status Alert */}
-        {isConnected === false && (
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              gap: 12,
-              padding: 16,
-              borderRadius: 8,
-              backgroundColor: isDark ? "#2c1c1d" : "#fef2f2",
-              borderColor: isDark ? "#7f1d1d" : "#fca5a5",
-              borderWidth: 1,
-            }}
-          >
-            <Icon as={WifiOff} style={{ color: isDark ? "#f87171" : "#dc2626" }} />
-            <View style={{ flex: 1 }}>
-              <Text style={{ fontWeight: "600", color: isDark ? "#f87171" : "#dc2626" }}>
-                Sin conexión
+    <SafeAreaView className="flex-1 bg-white dark:bg-zinc-950">
+      <View className="flex-1 relative">
+        <ScrollView
+          contentContainerClassName="p-6 pb-28 gap-6"
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Connection Status Banner */}
+          <ConnectionBanner />
+
+          {/* Header */}
+          <View className="flex-row justify-between items-center mt-2">
+            <View>
+              <Text className="text-zinc-900 dark:text-zinc-50 text-2xl font-bold">
+                Cuadernos
               </Text>
-              <Text variant="small" style={{ color: isDark ? "#fca5a5" : "#7f1d1d" }}>
-                No se pudo conectar al servidor RAG. Verifica que n8n esté activo.
+              <Text className="text-zinc-500 dark:text-zinc-400 text-sm mt-0.5">
+                Tus documentos indexados y chats RAG
               </Text>
             </View>
+
+            {/* Theme Toggle Button */}
+            <TouchableOpacity
+              onPress={toggleTheme}
+              className="p-2.5 rounded-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800"
+              activeOpacity={0.7}
+            >
+              <Icon
+                as={isDark ? Sun : Moon}
+                className="text-zinc-900 dark:text-zinc-50 size-5"
+              />
+            </TouchableOpacity>
+          </View>
+
+          {/* Projects List */}
+          <View className="gap-2">
+            {projects.length === 0 ? (
+              <Card className="bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
+                <CardHeader className="items-center py-8 gap-3">
+                  <Icon as={BookOpen} className="text-zinc-400 size-12" />
+                  <CardTitle className="text-zinc-900 dark:text-zinc-50 text-base font-semibold">
+                    No hay cuadernos
+                  </CardTitle>
+                  <CardDescription className="text-zinc-500 dark:text-zinc-400 text-center text-sm">
+                    {isBackendOnline
+                      ? "Crea tu primer cuaderno usando el botón + al fondo de la pantalla."
+                      : "No hay conexión con el servidor RAG. Restablece la conexión para empezar."}
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+            ) : (
+              projects.map((project) => (
+                <ProjectCard
+                  key={project.id}
+                  project={project}
+                  isConnected={isBackendOnline}
+                  onPress={() =>
+                    router.push({
+                      pathname: "/project/[id]",
+                      params: { id: project.id, name: project.name },
+                    })
+                  }
+                  onDelete={handleDeletePress}
+                />
+              ))
+            )}
+          </View>
+        </ScrollView>
+
+        {/* Floating Centered Bottom "+" Button */}
+        {isBackendOnline && (
+          <View className="absolute bottom-6 left-0 right-0 items-center z-50">
+            <Button
+              onPress={() => setIsNewProjectOpen(true)}
+              className="h-14 w-14 rounded-full items-center justify-center bg-zinc-900 dark:bg-zinc-50 shadow-lg active:bg-zinc-800 dark:active:bg-zinc-200"
+            >
+              <Icon as={Plus} className="text-white dark:text-zinc-950 size-6" />
+            </Button>
           </View>
         )}
 
-        {/* Header */}
-        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-          <View>
-            <Text variant="h2" style={{ color: colors.foreground, borderBottomWidth: 0, paddingBottom: 0 }}>
-              Cuadernos
-            </Text>
-            <Text variant="muted" style={{ color: colors.mutedForeground }}>
-              Tus documentos indexados y chats RAG
-            </Text>
-          </View>
+        {/* Compound Dialog to Create Project */}
+        <NewProjectDialog
+          open={isNewProjectOpen}
+          onOpenChange={setIsNewProjectOpen}
+          onCreate={handleAddNewProject}
+        />
 
-          {/* New Project Dialog */}
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button size="icon" style={{ backgroundColor: colors.primary, borderRadius: 9999 }}>
-                <Icon as={Plus} style={{ color: colors.primaryForeground }} />
-              </Button>
-            </DialogTrigger>
-            <DialogContent style={{ backgroundColor: colors.background, borderColor: colors.border }}>
-              <DialogHeader>
-                <DialogTitle style={{ color: colors.foreground }}>Nuevo Cuaderno</DialogTitle>
-                <DialogDescription style={{ color: colors.mutedForeground }}>
-                  Crea un nuevo proyecto/cuaderno independiente para tus documentos.
-                </DialogDescription>
-              </DialogHeader>
+        {/* Reusable Dialogs replacing Native Alerts */}
+        <ConfirmationDialog
+          open={isConfirmOpen}
+          onOpenChange={setIsConfirmOpen}
+          title="Eliminar Proyecto"
+          description={`¿Estás seguro de que quieres eliminar el proyecto "${projectToDelete?.name}"? Esto borrará todos sus documentos y chat asociados localmente y en el RAG.`}
+          onConfirm={confirmDelete}
+          confirmText="Eliminar"
+          variant="destructive"
+        />
 
-              <View style={{ marginVertical: 12 }}>
-                <TextInput
-                  placeholder="Nombre del cuaderno..."
-                  placeholderTextColor={colors.mutedForeground}
-                  value={newProjectName}
-                  onChangeText={setNewProjectName}
-                  style={{
-                    backgroundColor: colors.card,
-                    color: colors.foreground,
-                    borderColor: colors.border,
-                    borderWidth: 1,
-                    borderRadius: 8,
-                    padding: 12,
-                    fontSize: 16,
-                  }}
-                  autoFocus
-                />
-              </View>
-
-              <DialogFooter style={{ flexDirection: "row", justifyContent: "end", gap: 12 }}>
-                <DialogClose asChild>
-                  <Button variant="outline" style={{ borderColor: colors.border }}>
-                    <Text style={{ color: colors.foreground }}>Cancelar</Text>
-                  </Button>
-                </DialogClose>
-                <Button 
-                  onPress={handleCreateProject}
-                  style={{ backgroundColor: colors.primary }}
-                >
-                  <Text style={{ color: colors.primaryForeground }}>Crear</Text>
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </View>
-
-        {/* Projects List */}
-        <View style={{ gap: 16 }}>
-          {projects.length === 0 ? (
-            <Card style={{ backgroundColor: colors.card, borderColor: colors.border }}>
-              <CardHeader style={{ alignItems: "center", paddingVertical: 32 }}>
-                <Icon as={BookOpen} size={48} style={{ color: colors.mutedForeground, marginBottom: 12 }} />
-                <CardTitle style={{ color: colors.foreground }}>No hay cuadernos</CardTitle>
-                <CardDescription style={{ color: colors.mutedForeground, textAlign: "center" }}>
-                  Crea tu primer cuaderno usando el botón + para empezar a indexar documentos.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-          ) : (
-            projects.map((project) => (
-              <TouchableOpacity
-                key={project.id}
-                onPress={() =>
-                  router.push({
-                    pathname: "/project/[id]",
-                    params: { id: project.id, name: project.name },
-                  })
-                }
-                activeOpacity={0.7}
-              >
-                <Card style={{ backgroundColor: colors.card, borderColor: colors.border, position: "relative" }}>
-                  <CardHeader style={{ paddingRight: 60 }}>
-                    <CardTitle style={{ color: colors.foreground }}>{project.name}</CardTitle>
-                    <CardDescription style={{ color: colors.mutedForeground }}>
-                      Creado el {project.createdAt}
-                    </CardDescription>
-                  </CardHeader>
-                  <TouchableOpacity
-                    onPress={() => handleDeleteProject(project.id, project.name)}
-                    style={{
-                      position: "absolute",
-                      right: 16,
-                      top: 24,
-                      padding: 8,
-                    }}
-                  >
-                    <Icon as={Trash2} size={18} style={{ color: "#ef4444" }} />
-                  </TouchableOpacity>
-                </Card>
-              </TouchableOpacity>
-            ))
-          )}
-        </View>
-      </ScrollView>
+        <AlertDialog
+          open={isAlertOpen}
+          onOpenChange={setIsAlertOpen}
+          title={alertInfo.title}
+          description={alertInfo.description}
+        />
+      </View>
     </SafeAreaView>
   );
 }

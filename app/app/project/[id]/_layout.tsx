@@ -17,27 +17,17 @@ export default function ProjectLayout() {
   const projectName = name || currentProject?.name || "Detalle del Proyecto";
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
+    <SafeAreaView className="flex-1 bg-white dark:bg-zinc-950">
       {/* Shared Header with Back Button */}
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          paddingHorizontal: 20,
-          paddingVertical: 14,
-          borderBottomWidth: 1,
-          borderColor: colors.border,
-          backgroundColor: colors.background,
-        }}
-      >
+      <View className="flex-row items-center px-5 py-4 border-b border-zinc-200 dark:border-zinc-850 bg-white dark:bg-zinc-950">
         <TouchableOpacity
           onPress={() => router.replace("/")}
-          style={{ marginRight: 16, padding: 4 }}
+          className="mr-4 p-1 rounded-full active:bg-zinc-100 dark:active:bg-zinc-800"
           activeOpacity={0.7}
         >
           <Feather name="arrow-left" size={20} color={colors.foreground} />
         </TouchableOpacity>
-        <Text style={{ fontSize: 18, fontWeight: "bold", color: colors.foreground }}>
+        <Text className="text-zinc-900 dark:text-zinc-50 font-bold text-lg">
           {projectName}
         </Text>
       </View>
@@ -50,6 +40,9 @@ export default function ProjectLayout() {
             backgroundColor: colors.background,
             borderTopWidth: 1,
             borderTopColor: colors.border,
+            height: 60,
+            paddingBottom: 8,
+            paddingTop: 8,
           },
           tabBarActiveTintColor: colors.foreground,
           tabBarInactiveTintColor: colors.mutedForeground,
