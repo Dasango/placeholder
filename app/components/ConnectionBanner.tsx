@@ -15,10 +15,10 @@ export function ConnectionBanner() {
       <Icon as={WifiOff} className="text-red-600 dark:text-red-400 size-5" />
       <View className="flex-1">
         <Text className="font-semibold text-red-600 dark:text-red-400">
-          Sin conexión
+          No connection
         </Text>
         <Text variant="small" className="text-red-700 dark:text-red-300">
-          No se pudo conectar al servidor RAG. Verifica que n8n esté activo.
+          Could not connect to the RAG server. Make sure n8n is running.
         </Text>
       </View>
     </View>

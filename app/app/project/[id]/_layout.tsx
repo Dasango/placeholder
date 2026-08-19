@@ -14,7 +14,7 @@ export default function ProjectLayout() {
   const projects = useAppStore((state) => state.projects);
 
   const currentProject = projects.find((p) => p.id === id);
-  const projectName = name || currentProject?.name || "Detalle del Proyecto";
+  const projectName = name || currentProject?.name || "Project Details";
 
   return (
     <SafeAreaView className="flex-1 bg-white dark:bg-zinc-950">
@@ -53,7 +53,7 @@ export default function ProjectLayout() {
         <Tabs.Screen
           name="index"
           options={{
-            title: "Documentos",
+            title: "Documents",
             tabBarIcon: ({ color }) => (
               <Feather name="file-text" size={20} color={color} />
             ),

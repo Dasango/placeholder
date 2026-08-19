@@ -27,8 +27,8 @@ export function useProjects() {
   const handleAddNewProject = (name: string) => {
     if (!isOnline) {
       triggerAlert(
-        "Servidor Desconectado",
-        "No se pueden crear cuadernos sin conexión al servidor. Por favor, levanta el backend de n8n."
+        "Server Disconnected",
+        "You can't create notebooks without a connection to the server. Please start the n8n backend."
       );
       return;
     }
@@ -44,8 +44,8 @@ export function useProjects() {
   const handleDeletePress = (projectId: string, projectName: string) => {
     if (!isOnline) {
       triggerAlert(
-        "Servidor Desconectado",
-        "No se pueden eliminar cuadernos sin conexión al servidor RAG."
+        "Server Disconnected",
+        "You can't delete notebooks without a connection to the RAG server."
       );
       return;
     }
@@ -56,8 +56,8 @@ export function useProjects() {
   const confirmDelete = () => {
     if (!isOnline) {
       triggerAlert(
-        "Servidor Desconectado",
-        "No se pueden eliminar archivos de la base de datos vectorial sin conexión al servidor."
+        "Server Disconnected",
+        "You can't delete files from the vector database without a connection to the server."
       );
       return;
     }

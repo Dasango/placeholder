@@ -29,7 +29,7 @@ export function ProjectCard({ project, onPress, onDelete, isConnected }: Project
               {project.name}
             </CardTitle>
             <CardDescription className="text-zinc-500 dark:text-zinc-400 text-xs mt-1">
-              Creado el {project.createdAt}
+              Created on {project.createdAt}
             </CardDescription>
           </View>
         </CardHeader>

@@ -47,16 +47,16 @@ export function NewProjectDialog({ open, onOpenChange, onCreate }: NewProjectDia
           >
             <View className="gap-1">
               <Text className="text-zinc-900 dark:text-zinc-50 font-bold text-lg">
-                Nuevo Cuaderno
+                New Notebook
               </Text>
               <Text className="text-zinc-500 dark:text-zinc-400 text-sm">
-                Crea un cuaderno independiente para organizar tus documentos.
+                Create an independent notebook to organize your documents.
               </Text>
             </View>
 
             <View className="my-1">
               <TextInput
-                placeholder="Nombre del cuaderno..."
+                placeholder="Notebook name..."
                 placeholderTextColor="#a1a1aa"
                 value={name}
                 onChangeText={(text) => {
@@ -70,7 +70,7 @@ export function NewProjectDialog({ open, onOpenChange, onCreate }: NewProjectDia
               />
               {error && (
                 <Text className="text-red-500 text-xs mt-1 pl-1 font-medium">
-                  El nombre del cuaderno es requerido.
+                  The notebook name is required.
                 </Text>
               )}
             </View>
@@ -81,13 +81,13 @@ export function NewProjectDialog({ open, onOpenChange, onCreate }: NewProjectDia
                 onPress={handleClose}
                 className="border border-zinc-200 dark:border-zinc-800"
               >
-                <Text className="text-zinc-700 dark:text-zinc-300">Cancelar</Text>
+                <Text className="text-zinc-700 dark:text-zinc-300">Cancel</Text>
               </Button>
               <Button
                 onPress={handleSubmit}
                 className="bg-zinc-900 dark:bg-zinc-50 active:bg-zinc-800 dark:active:bg-zinc-200"
               >
-                <Text className="text-white dark:text-zinc-950 font-semibold">Crear</Text>
+                <Text className="text-white dark:text-zinc-950 font-semibold">Create</Text>
               </Button>
             </View>
           </KeyboardAvoidingView>

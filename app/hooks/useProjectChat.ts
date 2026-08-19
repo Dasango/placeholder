@@ -26,8 +26,8 @@ export function useProjectChat(projectId: string | undefined) {
   const handleSendMessage = (text: string) => {
     if (!isOnline) {
       triggerAlert(
-        "Servidor Desconectado",
-        "No se pueden enviar mensajes de chat sin conexión al servidor."
+        "Server Disconnected",
+        "You can't send chat messages without a connection to the server."
       );
       return;
     }
@@ -60,7 +60,7 @@ export function useProjectChat(projectId: string | undefined) {
           } else if (typeof data === "string") {
             replyContent = data;
           } else {
-            replyContent = "No se pudo interpretar la respuesta del servidor RAG.";
+            replyContent = "The RAG server's response could not be interpreted.";
           }
 
           const assistantMsg: ChatMessage = {
@@ -80,7 +80,7 @@ export function useProjectChat(projectId: string | undefined) {
           const errorMsg: ChatMessage = {
             id: Math.random().toString(36).substring(2, 11),
             role: "assistant",
-            content: `⚠️ Error de red: No se pudo conectar al RAG.\nDetalles: ${err.message}`,
+            content: `⚠️ Network error: Could not connect to the RAG.\nDetails: ${err.message}`,
             timestamp: new Date().toLocaleTimeString([], {
               hour: "2-digit",
               minute: "2-digit",
@@ -95,8 +95,8 @@ export function useProjectChat(projectId: string | undefined) {
   const handleClearPress = () => {
     if (!isOnline) {
       triggerAlert(
-        "Acción Deshabilitada",
-        "No se puede limpiar el historial de chat si el servidor está fuera de línea."
+        "Action Disabled",
+        "The chat history can't be cleared while the server is offline."
       );
       return;
     }
@@ -106,8 +106,8 @@ export function useProjectChat(projectId: string | undefined) {
   const confirmClear = () => {
     if (!isOnline) {
       triggerAlert(
-        "Acción Deshabilitada",
-        "No se puede limpiar el historial de chat si el servidor está fuera de línea."
+        "Action Disabled",
+        "The chat history can't be cleared while the server is offline."
       );
       return;
     }

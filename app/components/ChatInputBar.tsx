@@ -26,8 +26,8 @@ export function ChatInputBar({ onSend, disabled, isConnected }: ChatInputBarProp
       <TextInput
         placeholder={
           isConnected
-            ? "Haz una pregunta sobre tus documentos..."
-            : "⚠️ Chat deshabilitado (sin conexión al servidor)"
+            ? "Ask a question about your documents..."
+            : "⚠️ Chat disabled (no connection to the server)"
         }
         placeholderTextColor="#a1a1aa"
         value={userInput}

@@ -35,7 +35,7 @@ export function DocumentPickerCard({ projectId, isConnected, onSuccess }: Docume
       }
     } catch (e) {
       console.error("Error picking document", e);
-      setStatus({ type: "error", message: "No se pudo seleccionar el archivo." });
+      setStatus({ type: "error", message: "The file could not be selected." });
     }
   };
 
@@ -63,13 +63,13 @@ export function DocumentPickerCard({ projectId, isConnected, onSuccess }: Docume
           setSelectedFile(null);
           setStatus({
             type: "success",
-            message: "¡El archivo ha sido indexado en el RAG correctamente!",
+            message: "The file has been indexed in the RAG successfully!",
           });
         },
         onError: (err: any) => {
           setStatus({
             type: "error",
-            message: `Fallo al indexar: ${err.message}`,
+            message: `Failed to index: ${err.message}`,
           });
         },
       }
@@ -88,12 +88,12 @@ export function DocumentPickerCard({ projectId, isConnected, onSuccess }: Docume
     <Card className="bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
       <CardHeader>
         <CardTitle className="text-zinc-900 dark:text-zinc-50 font-bold">
-          Agregar Documento
+          Add Document
         </CardTitle>
         <CardDescription className="text-zinc-500 dark:text-zinc-400 text-sm">
           {isConnected
-            ? "Sube archivos PDF, TXT o CSV para indexarlos en el cuaderno."
-            : "⚠️ Carga deshabilitada por falta de conexión al servidor RAG."}
+            ? "Upload PDF, TXT or CSV files to index them in the notebook."
+            : "⚠️ Upload disabled due to no connection to the RAG server."}
         </CardDescription>
       </CardHeader>
       <CardContent className="gap-4">
@@ -107,7 +107,7 @@ export function DocumentPickerCard({ projectId, isConnected, onSuccess }: Docume
         >
           <Icon as={Upload} className="text-zinc-400 size-7" />
           <Text className="text-zinc-800 dark:text-zinc-200 font-medium text-center">
-            {selectedFile ? selectedFile.name : "Seleccionar Archivo"}
+            {selectedFile ? selectedFile.name : "Select File"}
           </Text>
           {selectedFile && (
             <Text className="text-zinc-500 dark:text-zinc-400 text-xs">
@@ -147,7 +147,7 @@ export function DocumentPickerCard({ projectId, isConnected, onSuccess }: Docume
               className="flex-1 border border-zinc-200 dark:border-zinc-800"
               disabled={uploadMutation.isPending}
             >
-              <Text className="text-zinc-700 dark:text-zinc-300">Cancelar</Text>
+              <Text className="text-zinc-700 dark:text-zinc-300">Cancel</Text>
             </Button>
             <Button
               onPress={handleUploadDocument}
@@ -157,7 +157,7 @@ export function DocumentPickerCard({ projectId, isConnected, onSuccess }: Docume
               {uploadMutation.isPending ? (
                 <ActivityIndicator size="small" color="#fff" />
               ) : (
-                <Text className="text-white dark:text-zinc-950 font-semibold">Indexar</Text>
+                <Text className="text-white dark:text-zinc-950 font-semibold">Index</Text>
               )}
             </Button>
           </View>

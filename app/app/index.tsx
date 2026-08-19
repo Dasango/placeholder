@@ -56,10 +56,10 @@ export default function Page() {
           <View className="flex-row justify-between items-center mt-2">
             <View>
               <Text className="text-zinc-900 dark:text-zinc-50 text-2xl font-bold">
-                Cuadernos
+                Notebooks
               </Text>
               <Text className="text-zinc-500 dark:text-zinc-400 text-sm mt-0.5">
-                Tus documentos indexados y chats RAG
+                Your indexed documents and RAG chats
               </Text>
             </View>
 
@@ -81,12 +81,12 @@ export default function Page() {
                 <CardHeader className="items-center py-8 gap-3">
                   <Icon as={BookOpen} className="text-zinc-400 size-12" />
                   <CardTitle className="text-zinc-900 dark:text-zinc-50 text-base font-semibold">
-                    No hay cuadernos
+                    No notebooks yet
                   </CardTitle>
                   <CardDescription className="text-zinc-500 dark:text-zinc-400 text-center text-sm">
                     {isBackendOnline
-                      ? "Crea tu primer cuaderno usando el botón + al fondo de la pantalla."
-                      : "No hay conexión con el servidor RAG. Restablece la conexión para empezar."}
+                      ? "Create your first notebook using the + button at the bottom of the screen."
+                      : "No connection to the RAG server. Restore the connection to get started."}
                   </CardDescription>
                 </CardHeader>
               </Card>
@@ -99,8 +99,8 @@ export default function Page() {
                   onPress={() => {
                     if (!isBackendOnline) {
                       triggerAlert(
-                        "Sin Conexión",
-                        "El servidor RAG está fuera de línea. No puedes ingresar a tus cuadernos hasta que se restablezca la conexión."
+                        "No Connection",
+                        "The RAG server is offline. You can't access your notebooks until the connection is restored."
                       );
                       return;
                     }
@@ -136,10 +136,10 @@ export default function Page() {
         <ConfirmationDialog
           open={isConfirmOpen}
           onOpenChange={setIsConfirmOpen}
-          title="Eliminar Proyecto"
-          description={`¿Estás seguro de que quieres eliminar el proyecto "${projectToDelete?.name}"? Esto borrará todos sus documentos y chat asociados localmente y en el RAG.`}
+          title="Delete Project"
+          description={`Are you sure you want to delete the project "${projectToDelete?.name}"? This will delete all of its associated documents and chats locally and in the RAG.`}
           onConfirm={confirmDelete}
-          confirmText="Eliminar"
+          confirmText="Delete"
           variant="destructive"
         />
 

@@ -39,7 +39,7 @@ export default function DocumentsScreen() {
         {!isBackendOnline && (
           <View className="p-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 rounded-lg flex-row items-center gap-2">
             <Text className="text-amber-700 dark:text-amber-450 text-xs font-semibold">
-              ⚠️ Ingesta fuera de línea. La base de datos no está disponible.
+              ⚠️ Ingestion offline. The database is unavailable.
             </Text>
           </View>
         )}
@@ -52,7 +52,7 @@ export default function DocumentsScreen() {
 
         <View className="gap-3">
           <Text className="text-zinc-900 dark:text-zinc-50 font-bold text-base pl-1">
-            Documentos Indexados ({uploadedDocs.length})
+            Indexed Documents ({uploadedDocs.length})
           </Text>
 
           {uploadedDocs.length === 0 ? (
@@ -60,7 +60,7 @@ export default function DocumentsScreen() {
               <CardContent className="items-center py-8 gap-2">
                 <Icon as={Info} className="text-zinc-400 size-6" />
                 <Text className="text-zinc-500 dark:text-zinc-400 text-center text-sm">
-                  Aún no has agregado ningún documento en este cuaderno.
+                  You haven't added any documents to this notebook yet.
                 </Text>
               </CardContent>
             </Card>
@@ -80,10 +80,10 @@ export default function DocumentsScreen() {
       <ConfirmationDialog
         open={isConfirmOpen}
         onOpenChange={setIsConfirmOpen}
-        title="Eliminar Documento"
-        description={`¿Estás seguro de que quieres eliminar el documento "${docToDelete?.name}"? Esto lo borrará de la base de datos vectorial de n8n y de la app.`}
+        title="Delete Document"
+        description={`Are you sure you want to delete the document "${docToDelete?.name}"? This will remove it from the n8n vector database and the app.`}
         onConfirm={confirmDelete}
-        confirmText="Eliminar"
+        confirmText="Delete"
         variant="destructive"
       />
 

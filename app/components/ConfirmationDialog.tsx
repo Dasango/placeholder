@@ -20,8 +20,8 @@ export function ConfirmationDialog({
   title,
   description,
   onConfirm,
-  confirmText = "Confirmar",
-  cancelText = "Cancelar",
+  confirmText = "Confirm",
+  cancelText = "Cancel",
   variant = "default",
 }: ConfirmationDialogProps) {
   const handleClose = () => {

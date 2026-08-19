@@ -1,13 +1,10 @@
 # Local Document RAG (n8n + PostgreSQL pgvector + Expo React Native)
 
-    # Documentación del Backend RAG (n8n Webhooks)
+# Documentación del Backend RAG (n8n Webhooks)
 
-    Esta documentación describe la interfaz técnica para interactuar con el backend RAG (Retrieval-Augmented
+Esta documentación describe la interfaz técnica para interactuar con el backend RAG (Retrieval-Augmented Generation) alojado en n8n. Contiene los dos únicos endpoints disponibles para el usuario final: subida de archivos y consulta conversacional.
 
-Generation) alojado en n8n. Contiene los dos únicos endpoints disponibles para el usuario final: subida de archivos
-y consulta conversacional.
-
-    ---
+---
 
     ## 1. Subida de Documentos (Ingesta RAG)
 

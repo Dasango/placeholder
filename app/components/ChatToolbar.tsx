@@ -19,7 +19,7 @@ export function ChatToolbar({ onClear, isConnected }: ChatToolbarProps) {
       >
         <Icon as={Trash2} className="text-red-500 size-3.5" />
         <Text className="text-red-500 text-xs font-semibold">
-          Limpiar Chat
+          Clear Chat
         </Text>
       </TouchableOpacity>
     </View>

@@ -16,7 +16,7 @@ export function AlertDialog({
   onOpenChange,
   title,
   description,
-  buttonText = "Entendido",
+  buttonText = "Got it",
 }: AlertDialogProps) {
   const handleClose = () => {
     onOpenChange(false);

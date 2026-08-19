@@ -63,10 +63,10 @@ export default function ChatScreen() {
             <View className="flex-1 items-center justify-center py-16 gap-3">
               <Icon as={Bot} className="text-zinc-400 size-12" />
               <Text className="text-zinc-900 dark:text-zinc-50 text-lg font-semibold">
-                ¡Hola! Haz tus consultas
+                Hello! Ask your questions
               </Text>
               <Text className="text-zinc-500 dark:text-zinc-400 text-center text-sm px-8">
-                Pregunta sobre la información contenida en los documentos indexados de este cuaderno.
+                Ask about the information contained in this notebook's indexed documents.
               </Text>
             </View>
           ) : (
@@ -79,7 +79,7 @@ export default function ChatScreen() {
             <View className="flex-row items-center gap-3 pl-1 py-2">
               <ActivityIndicator size="small" color="#71717a" />
               <Text className="text-zinc-500 dark:text-zinc-400 text-sm">
-                El agente está buscando respuestas...
+                The agent is searching for answers...
               </Text>
             </View>
           )}
@@ -95,10 +95,10 @@ export default function ChatScreen() {
       <ConfirmationDialog
         open={isConfirmOpen}
         onOpenChange={setIsConfirmOpen}
-        title="Limpiar Conversación"
-        description="¿Estás seguro de que quieres borrar el historial de chat de este cuaderno? Esta acción no se puede deshacer."
+        title="Clear Conversation"
+        description="Are you sure you want to delete this notebook's chat history? This action cannot be undone."
         onConfirm={confirmClear}
-        confirmText="Borrar"
+        confirmText="Clear"
         variant="destructive"
       />
 

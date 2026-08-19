@@ -27,8 +27,8 @@ export function useProjectDocuments(projectId: string | undefined) {
   const handleUploadSuccess = (newDoc: UploadedDocument) => {
     if (!isOnline) {
       triggerAlert(
-        "Servidor Desconectado",
-        "No se pueden subir documentos sin conexión al servidor."
+        "Server Disconnected",
+        "You can't upload documents without a connection to the server."
       );
       return;
     }
@@ -41,8 +41,8 @@ export function useProjectDocuments(projectId: string | undefined) {
   const handleDeletePress = (docId: string, docName: string) => {
     if (!isOnline) {
       triggerAlert(
-        "Servidor Desconectado",
-        "No se pueden borrar documentos vectorizados sin conexión al servidor."
+        "Server Disconnected",
+        "You can't delete vectorized documents without a connection to the server."
       );
       return;
     }
@@ -53,8 +53,8 @@ export function useProjectDocuments(projectId: string | undefined) {
   const confirmDelete = () => {
     if (!isOnline) {
       triggerAlert(
-        "Servidor Desconectado",
-        "No se pueden borrar documentos vectorizados sin conexión al servidor."
+        "Server Disconnected",
+        "You can't delete vectorized documents without a connection to the server."
       );
       return;
     }

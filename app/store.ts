@@ -36,13 +36,7 @@ interface AppState {
 export const useAppStore = create<AppState>()(
   persist(
     (set) => ({
-      projects: [
-        {
-          id: "default_project",
-          name: "Proyecto Ejemplo",
-          createdAt: new Date().toLocaleDateString(),
-        },
-      ],
+      projects: [],
       documentsByProject: {},
       chatsByProject: {},
 
