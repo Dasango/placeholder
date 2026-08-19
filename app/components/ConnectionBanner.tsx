@@ -1,14 +1,14 @@
 import React from "react";
 import { View } from "react-native";
-import { useConnectionCheck } from "../services/queries";
+import { useConnection } from "../contexts/ConnectionContext";
 import { Text } from "@/components/ui/text";
 import { Icon } from "@/components/ui/icon";
 import { WifiOff } from "lucide-react-native";
 
 export function ConnectionBanner() {
-  const { data: isConnected } = useConnectionCheck();
+  const { isOnline } = useConnection();
 
-  if (isConnected !== false) return null;
+  if (isOnline) return null;
 
   return (
     <View className="flex-row items-center gap-3 p-4 rounded-lg bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50">

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAppStore, UploadedDocument } from "../store";
-import { useConnectionCheck, useDeleteDocument } from "../services/queries";
+import { useDeleteDocument } from "../services/queries";
+import { useConnection } from "../contexts/ConnectionContext";
 
 export function useProjectDocuments(projectId: string | undefined) {
   // Zustand State Management
@@ -8,9 +9,9 @@ export function useProjectDocuments(projectId: string | undefined) {
   const setDocuments = useAppStore((state) => state.setDocuments);
   const uploadedDocs = (projectId ? documentsByProject[projectId] : []) || [];
 
-  // Connection query check
-  const { data: isConnected } = useConnectionCheck();
-  const isBackendOnline = isConnected !== false;
+  // Global Connection Context
+  const { isOnline } = useConnection();
+  const isBackendOnline = isOnline;
 
   // React Query Mutation to delete single document in backend
   const deleteMutation = useDeleteDocument();
@@ -29,15 +30,23 @@ export function useProjectDocuments(projectId: string | undefined) {
   };
 
   const handleUploadSuccess = (newDoc: UploadedDocument) => {
+    if (!isOnline) {
+      triggerAlert(
+        "Servidor Desconectado",
+        "No se pueden subir documentos sin conexión al servidor."
+      );
+      return;
+    }
+
     if (!projectId) return;
     const updatedDocs = [newDoc, ...uploadedDocs];
     setDocuments(projectId, updatedDocs);
   };
 
   const handleDeletePress = (docId: string, docName: string) => {
-    if (!isBackendOnline) {
+    if (!isOnline) {
       triggerAlert(
-        "Acción Deshabilitada",
+        "Servidor Desconectado",
         "No se pueden borrar documentos vectorizados sin conexión al servidor."
       );
       return;
@@ -47,6 +56,14 @@ export function useProjectDocuments(projectId: string | undefined) {
   };
 
   const confirmDelete = () => {
+    if (!isOnline) {
+      triggerAlert(
+        "Servidor Desconectado",
+        "No se pueden borrar documentos vectorizados sin conexión al servidor."
+      );
+      return;
+    }
+
     if (!projectId || !docToDelete) return;
     const { id: docId, name: docName } = docToDelete;
 

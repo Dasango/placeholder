@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAppStore, ChatMessage } from "../store";
-import { useConnectionCheck, useSendChatMessage } from "../services/queries";
+import { useSendChatMessage } from "../services/queries";
+import { useConnection } from "../contexts/ConnectionContext";
 
 export function useProjectChat(projectId: string | undefined) {
   // Zustand State Management
@@ -8,9 +9,9 @@ export function useProjectChat(projectId: string | undefined) {
   const setChats = useAppStore((state) => state.setChats);
   const chatHistory = (projectId ? chatsByProject[projectId] : []) || [];
 
-  // Connection query check
-  const { data: isConnected } = useConnectionCheck();
-  const isBackendOnline = isConnected !== false;
+  // Global Connection Context
+  const { isOnline } = useConnection();
+  const isBackendOnline = isOnline;
 
   // React Query Mutation to send chat message
   const chatMutation = useSendChatMessage();
@@ -28,7 +29,15 @@ export function useProjectChat(projectId: string | undefined) {
   };
 
   const handleSendMessage = (text: string) => {
-    if (!projectId || !isBackendOnline) return;
+    if (!isOnline) {
+      triggerAlert(
+        "Servidor Desconectado",
+        "No se pueden enviar mensajes de chat sin conexión al servidor."
+      );
+      return;
+    }
+
+    if (!projectId) return;
 
     // 1. Add user message locally
     const userMsg: ChatMessage = {
@@ -44,7 +53,7 @@ export function useProjectChat(projectId: string | undefined) {
     const newHistory = [...chatHistory, userMsg];
     setChats(projectId, newHistory);
 
-    // 2. Query RAG agent backend
+    // 2. Query RAG agent backend (Only executes if online)
     chatMutation.mutate(
       { message: text, projectId },
       {
@@ -91,7 +100,7 @@ export function useProjectChat(projectId: string | undefined) {
   };
 
   const handleClearPress = () => {
-    if (!isBackendOnline) {
+    if (!isOnline) {
       triggerAlert(
         "Acción Deshabilitada",
         "No se puede limpiar el historial de chat si el servidor está fuera de línea."
@@ -102,6 +111,13 @@ export function useProjectChat(projectId: string | undefined) {
   };
 
   const confirmClear = () => {
+    if (!isOnline) {
+      triggerAlert(
+        "Acción Deshabilitada",
+        "No se puede limpiar el historial de chat si el servidor está fuera de línea."
+      );
+      return;
+    }
     if (projectId) {
       setChats(projectId, []);
     }

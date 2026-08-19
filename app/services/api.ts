@@ -12,26 +12,19 @@ export interface ChatResponse {
   [key: string]: any;
 }
 
-/**
- * Checks connection to the n8n backend service by pinging the root or webhook URL.
- * Throws an error or returns false if unreachable.
- */
 export async function checkBackendConnection(): Promise<boolean> {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 4000);
+  const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 seconds timeout
 
   try {
-    // n8n is running locally or remotely. Pinging the root endpoint
-    const response = await fetch(N8N_URL, {
+    const response = await fetch(`${N8N_URL}/healthz`, {
       method: "GET",
       signal: controller.signal,
     });
     
-    // Even if it returns 404 or 401, it means the server is reachable and active.
-    // If it throws a network error, the server is unreachable.
-    return response.ok || response.status < 500;
+    // Status < 500 means server responds (could be 200 ok, or redirects/auth required, but it is reachable)
+    return response.status < 500;
   } catch (error) {
-    console.warn("Connection verification failed:", error);
     return false;
   } finally {
     clearTimeout(timeoutId);
