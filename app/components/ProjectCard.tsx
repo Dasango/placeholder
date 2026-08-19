@@ -1,5 +1,5 @@
 import React from "react";
-import { TouchableOpacity, View, Alert } from "react-native";
+import { TouchableOpacity, View } from "react-native";
 import { Project } from "../store";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Icon } from "@/components/ui/icon";
@@ -13,22 +13,11 @@ interface ProjectCardProps {
 }
 
 export function ProjectCard({ project, onPress, onDelete, isConnected }: ProjectCardProps) {
-  const handlePress = () => {
-    if (!isConnected) {
-      Alert.alert(
-        "Sin Conexión",
-        "El servidor RAG está fuera de línea. No puedes ingresar a tus cuadernos hasta que se restablezca la conexión."
-      );
-      return;
-    }
-    onPress();
-  };
-
   return (
     <TouchableOpacity
-      onPress={handlePress}
-      activeOpacity={0.7}
-      className="w-full mb-3"
+      onPress={onPress}
+      activeOpacity={isConnected ? 0.7 : 1}
+      className={`w-full mb-3 ${!isConnected ? "opacity-60" : ""}`}
     >
       <Card className="bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 relative">
         <CardHeader className="pr-16 flex-row items-center gap-4 py-5">
@@ -46,7 +35,10 @@ export function ProjectCard({ project, onPress, onDelete, isConnected }: Project
         </CardHeader>
         <TouchableOpacity
           onPress={() => onDelete(project.id, project.name)}
-          className="absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-950"
+          disabled={!isConnected}
+          className={`absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-950 ${
+            !isConnected ? "opacity-30" : ""
+          }`}
           activeOpacity={0.6}
         >
           <Icon as={Trash2} className="text-red-500 size-5" />

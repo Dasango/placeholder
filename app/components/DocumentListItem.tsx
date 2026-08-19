@@ -1,5 +1,5 @@
 import React from "react";
-import { View, TouchableOpacity, Alert } from "react-native";
+import { View, TouchableOpacity } from "react-native";
 import { UploadedDocument } from "../store";
 import { Text } from "@/components/ui/text";
 import { Icon } from "@/components/ui/icon";
@@ -12,17 +12,6 @@ interface DocumentListItemProps {
 }
 
 export function DocumentListItem({ doc, onDelete, isConnected }: DocumentListItemProps) {
-  const handleDeletePress = () => {
-    if (!isConnected) {
-      Alert.alert(
-        "Acción Deshabilitada",
-        "No se pueden borrar documentos vectorizados de la base de datos sin conexión al servidor."
-      );
-      return;
-    }
-    onDelete();
-  };
-
   const formatBytes = (bytes: number) => {
     if (bytes === 0) return "0 Bytes";
     const k = 1024;
@@ -46,7 +35,7 @@ export function DocumentListItem({ doc, onDelete, isConnected }: DocumentListIte
       </View>
 
       <TouchableOpacity
-        onPress={handleDeletePress}
+        onPress={onDelete}
         disabled={!isConnected}
         className={`p-2 rounded-full ${!isConnected ? "opacity-30" : ""}`}
         activeOpacity={0.6}

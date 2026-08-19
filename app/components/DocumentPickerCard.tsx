@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, TouchableOpacity, ActivityIndicator, Alert } from "react-native";
+import { View, TouchableOpacity, ActivityIndicator } from "react-native";
 import * as DocumentPicker from "expo-document-picker";
 import { useUploadDocument } from "../services/queries";
 import { UploadedDocument } from "../store";
@@ -17,13 +17,12 @@ interface DocumentPickerCardProps {
 
 export function DocumentPickerCard({ projectId, isConnected, onSuccess }: DocumentPickerCardProps) {
   const [selectedFile, setSelectedFile] = useState<DocumentPicker.DocumentPickerAsset | null>(null);
+  const [status, setStatus] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const uploadMutation = useUploadDocument();
 
   const handleSelectDocument = async () => {
-    if (!isConnected) {
-      Alert.alert("Acción Deshabilitada", "No hay conexión con el servidor n8n. No se pueden seleccionar archivos.");
-      return;
-    }
+    setStatus(null);
+    if (!isConnected) return;
 
     try {
       const result = await DocumentPicker.getDocumentAsync({
@@ -36,17 +35,13 @@ export function DocumentPickerCard({ projectId, isConnected, onSuccess }: Docume
       }
     } catch (e) {
       console.error("Error picking document", e);
-      Alert.alert("Error", "No se pudo seleccionar el archivo");
+      setStatus({ type: "error", message: "No se pudo seleccionar el archivo." });
     }
   };
 
   const handleUploadDocument = () => {
-    if (!selectedFile || !projectId) return;
-
-    if (!isConnected) {
-      Alert.alert("Acción Deshabilitada", "No hay conexión con el servidor. No se pueden subir archivos.");
-      return;
-    }
+    if (!selectedFile || !projectId || !isConnected) return;
+    setStatus(null);
 
     const fileToUpload = {
       uri: selectedFile.uri,
@@ -66,13 +61,16 @@ export function DocumentPickerCard({ projectId, isConnected, onSuccess }: Docume
           };
           onSuccess(newDoc);
           setSelectedFile(null);
-          Alert.alert("Éxito", "¡El archivo ha sido indexado en el RAG correctamente!");
+          setStatus({
+            type: "success",
+            message: "¡El archivo ha sido indexado en el RAG correctamente!",
+          });
         },
         onError: (err: any) => {
-          Alert.alert(
-            "Fallo de conexión",
-            `No se pudo subir o indexar el documento.\n\nDetalles: ${err.message}`
-          );
+          setStatus({
+            type: "error",
+            message: `Fallo al indexar: ${err.message}`,
+          });
         },
       }
     );
@@ -109,7 +107,7 @@ export function DocumentPickerCard({ projectId, isConnected, onSuccess }: Docume
           activeOpacity={0.7}
         >
           <Icon as={Upload} className="text-zinc-400 size-7" />
-          <Text className="text-zinc-800 dark:text-zinc-200 font-medium">
+          <Text className="text-zinc-800 dark:text-zinc-200 font-medium text-center">
             {selectedFile ? selectedFile.name : "Seleccionar Archivo"}
           </Text>
           {selectedFile && (
@@ -119,12 +117,36 @@ export function DocumentPickerCard({ projectId, isConnected, onSuccess }: Docume
           )}
         </TouchableOpacity>
 
+        {/* Local Feedback Status Message */}
+        {status && (
+          <View
+            className={`p-3 rounded-lg border ${
+              status.type === "success"
+                ? "bg-green-55 border-green-200 dark:bg-green-950/20 dark:border-green-900/50"
+                : "bg-red-50 border-red-200 dark:bg-red-950/20 dark:border-red-900/50"
+            }`}
+          >
+            <Text
+              className={`text-xs font-semibold ${
+                status.type === "success"
+                  ? "text-green-700 dark:text-green-400"
+                  : "text-red-700 dark:text-red-400"
+              }`}
+            >
+              {status.message}
+            </Text>
+          </View>
+        )}
+
         {/* Actions */}
         {selectedFile && isConnected && (
           <View className="flex-row gap-3">
             <Button
               variant="outline"
-              onPress={() => setSelectedFile(null)}
+              onPress={() => {
+                setSelectedFile(null);
+                setStatus(null);
+              }}
               className="flex-1 border border-zinc-200 dark:border-zinc-800"
               disabled={uploadMutation.isPending}
             >

@@ -105,12 +105,19 @@ export default function Page() {
                   key={project.id}
                   project={project}
                   isConnected={isBackendOnline}
-                  onPress={() =>
+                  onPress={() => {
+                    if (!isBackendOnline) {
+                      triggerAlert(
+                        "Sin Conexión",
+                        "El servidor RAG está fuera de línea. No puedes ingresar a tus cuadernos hasta que se restablezca la conexión."
+                      );
+                      return;
+                    }
                     router.push({
                       pathname: "/project/[id]",
                       params: { id: project.id, name: project.name },
-                    })
-                  }
+                    });
+                  }}
                   onDelete={handleDeletePress}
                 />
               ))
