@@ -10,27 +10,36 @@ import {
 import { Feather } from "@expo/vector-icons";
 import * as DocumentPicker from "expo-document-picker";
 import { useLocalSearchParams } from "expo-router";
-import { useMutation } from "@tanstack/react-query";
-import { N8N_URL } from "../../../config";
 import { useAppStore, UploadedDocument } from "../../../store";
+import { useAppTheme } from "../../../hooks/useAppTheme";
+import { useUploadDocument, useDeleteDocument } from "../../../services/queries";
+import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Icon } from "@/components/ui/icon";
+import { Upload, Trash2, FileText, CheckCircle, Info } from "lucide-react-native";
 
 export default function DocumentsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const { colors } = useAppTheme();
 
-  // Document Upload State
+  // Zustand state management for local document metadata listing
   const documentsByProject = useAppStore((state) => state.documentsByProject);
   const setDocuments = useAppStore((state) => state.setDocuments);
   const uploadedDocs = (id ? documentsByProject[id] : []) || [];
 
-  // Document Upload State
+  // Local selection state
   const [selectedFile, setSelectedFile] =
     useState<DocumentPicker.DocumentPickerAsset | null>(null);
 
-  // Document Picker
+  // Isolated React Query Hooks
+  const uploadMutation = useUploadDocument();
+  const deleteMutation = useDeleteDocument();
+
+  // File Picker
   const handleSelectDocument = async () => {
     try {
       const result = await DocumentPicker.getDocumentAsync({
-        type: ["application/pdf", "text/csv"],
+        type: ["application/pdf", "text/csv", "text/plain"],
         copyToCacheDirectory: true,
       });
 
@@ -43,87 +52,46 @@ export default function DocumentsScreen() {
     }
   };
 
-  // Document Upload Mutation
-  const uploadMutation = useMutation({
-    mutationFn: async (file: DocumentPicker.DocumentPickerAsset) => {
-      const formData = new FormData();
-      formData.append("data", {
-        uri: file.uri,
-        name: file.name,
-        type: file.mimeType || "application/pdf",
-      } as any);
-      formData.append("projectId", id);
-
-      const endpoint = `${N8N_URL}/webhook/upload-pdf`;
-      const response = await fetch(endpoint, {
-        method: "POST",
-        body: formData,
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP Error: ${response.status}`);
-      }
-
-      return file;
-    },
-    onSuccess: (file) => {
-      const newDoc: UploadedDocument = {
-        id: Math.random().toString(36).substr(2, 9),
-        name: file.name,
-        size: file.size || 0,
-        timestamp: new Date().toLocaleString(),
-      };
-
-      const updatedDocs = [newDoc, ...uploadedDocs];
-      if (id) {
-        setDocuments(id, updatedDocs);
-      }
-
-      setSelectedFile(null);
-      Alert.alert(
-        "Éxito",
-        "¡El archivo ha sido indexado en el proyecto correctamente!",
-      );
-    },
-    onError: (e: any) => {
-      console.error("Upload error", e);
-      Alert.alert(
-        "Fallo de conexión",
-        `No se pudo conectar al backend en ${N8N_URL}.\n\nDetalles: ${e.message}\n\nAsegúrate de que n8n esté corriendo y que tu dispositivo esté en la misma red.`,
-      );
-    },
-  });
-
+  // Upload trigger
   const handleUploadDocument = () => {
     if (!selectedFile || !id) return;
-    uploadMutation.mutate(selectedFile);
-  };
 
-  // Clear Uploaded Files list
-  const handleClearDocsList = () => {
-    Alert.alert(
-      "Confirmación",
-      "¿Quieres limpiar la lista local de documentos de este proyecto? Esto no los borrará de la base de datos de n8n, solo los quitará de la vista en la app.",
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Limpiar",
-          style: "destructive",
-          onPress: () => {
-            if (id) {
-              setDocuments(id, []);
-            }
-          },
+    const fileToUpload = {
+      uri: selectedFile.uri,
+      name: selectedFile.name,
+      mimeType: selectedFile.mimeType || "application/pdf",
+    };
+
+    uploadMutation.mutate(
+      { file: fileToUpload, projectId: id },
+      {
+        onSuccess: () => {
+          const newDoc: UploadedDocument = {
+            id: Math.random().toString(36).substring(2, 11),
+            name: selectedFile.name,
+            size: selectedFile.size || 0,
+            timestamp: new Date().toLocaleString(),
+          };
+
+          const updatedDocs = [newDoc, ...uploadedDocs];
+          setDocuments(id, updatedDocs);
+          setSelectedFile(null);
+          Alert.alert("Éxito", "¡El archivo ha sido indexado en el RAG correctamente!");
         },
-      ],
+        onError: (err: any) => {
+          Alert.alert(
+            "Fallo de conexión",
+            `No se pudo subir o indexar el documento.\n\nDetalles: ${err.message}`
+          );
+        },
+      }
     );
   };
 
   // Delete individual document
   const handleDeleteDoc = (docId: string, docName: string) => {
+    if (!id) return;
+
     Alert.alert(
       "Confirmación",
       `¿Estás seguro de que quieres eliminar el documento "${docName}"? Esto lo borrará de la base de datos de n8n y de la app.`,
@@ -133,36 +101,30 @@ export default function DocumentsScreen() {
           text: "Eliminar",
           style: "destructive",
           onPress: async () => {
-            try {
-              // Intentar borrar los documentos vectorizados de la base de datos en n8n
-              const response = await fetch(`${N8N_URL}/webhook/delete-document`, {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
+            // Delete from vector store
+            deleteMutation.mutate(
+              { projectId: id, documentName: docName },
+              {
+                onSuccess: () => {
+                  // Delete locally in Zustand
+                  setDocuments(
+                    id,
+                    uploadedDocs.filter((d) => d.id !== docId)
+                  );
                 },
-                body: JSON.stringify({
-                  projectId: id,
-                  documentName: docName,
-                }),
-              });
-
-              if (!response.ok) {
-                console.warn(`Error al intentar borrar el documento en n8n: ${response.status}`);
+                onError: (err: any) => {
+                  console.warn("Could not delete from n8n vector store, deleting locally anyway:", err);
+                  // Ensure local deletion even if n8n endpoint fails
+                  setDocuments(
+                    id,
+                    uploadedDocs.filter((d) => d.id !== docId)
+                  );
+                },
               }
-            } catch (error) {
-              console.error("Error al conectar con n8n para eliminar el documento:", error);
-            }
-
-            // Eliminar de forma local en Zustand y AsyncStorage
-            if (id) {
-              setDocuments(
-                id,
-                uploadedDocs.filter((d) => d.id !== docId),
-              );
-            }
+            );
           },
         },
-      ],
+      ]
     );
   };
 
@@ -175,145 +137,129 @@ export default function DocumentsScreen() {
   };
 
   return (
-    <View className="flex-1 bg-slate-900 px-6 pt-4">
-        <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-          <Text className="text-slate-400 text-sm mb-4 leading-relaxed">
-            Carga documentos exclusivos para este proyecto. La base de datos los
-            vectorizará de forma aislada, garantizando la privacidad del
-            contenido.
-          </Text>
-
-          {/* Document selector zone */}
-          {!selectedFile ? (
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
+      <ScrollView contentContainerStyle={{ padding: 20, gap: 20 }}>
+        
+        {/* Upload Card */}
+        <Card style={{ backgroundColor: colors.card, borderColor: colors.border }}>
+          <CardHeader>
+            <CardTitle style={{ color: colors.foreground }}>Agregar Documento</CardTitle>
+            <CardDescription style={{ color: colors.mutedForeground }}>
+              Sube archivos PDF, TXT o CSV para indexarlos en el cuaderno.
+            </CardDescription>
+          </CardHeader>
+          <CardContent style={{ gap: 16 }}>
+            {/* File Selector */}
             <TouchableOpacity
               onPress={handleSelectDocument}
-              className="border-2 border-dashed border-slate-600 rounded-2xl py-12 px-6 justify-center items-center bg-slate-800/30"
+              style={{
+                borderWidth: 1,
+                borderStyle: "dashed",
+                borderColor: colors.border,
+                borderRadius: 8,
+                padding: 24,
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: colors.background,
+                gap: 8,
+              }}
+              activeOpacity={0.7}
             >
-              <Feather name="upload-cloud" size={48} color="#6366f1" />
-              <Text className="text-white font-semibold mt-4 text-base">
-                Seleccionar Documento
+              <Icon as={Upload} size={28} style={{ color: colors.mutedForeground }} />
+              <Text style={{ color: colors.foreground, fontWeight: "500" }}>
+                {selectedFile ? selectedFile.name : "Seleccionar Archivo"}
               </Text>
-              <Text className="text-slate-500 text-xs mt-1">
-                Formatos soportados: .pdf, .csv
-              </Text>
-            </TouchableOpacity>
-          ) : (
-            <View className="bg-slate-800/90 rounded-2xl p-4 border border-slate-700/60 flex-row items-center justify-between">
-              <View className="flex-row items-center flex-1 pr-4">
-                <View className="p-3 bg-indigo-900/40 rounded-xl mr-3">
-                  <Feather name="file" size={24} color="#818cf8" />
-                </View>
-                <View className="flex-1">
-                  <Text
-                    className="text-white font-semibold text-sm"
-                    numberOfLines={1}
-                  >
-                    {selectedFile.name}
-                  </Text>
-                  <Text className="text-slate-400 text-xs mt-0.5">
-                    {formatBytes(selectedFile.size || 0)}
-                  </Text>
-                </View>
-              </View>
-              <TouchableOpacity
-                onPress={() => setSelectedFile(null)}
-                className="p-2 rounded-lg bg-slate-700/50"
-              >
-                <Feather name="trash-2" size={18} color="#f87171" />
-              </TouchableOpacity>
-            </View>
-          )}
-
-          {/* Upload Button */}
-          {selectedFile && (
-            <TouchableOpacity
-              onPress={handleUploadDocument}
-              disabled={uploadMutation.isPending}
-              className="mt-4 bg-indigo-600 rounded-xl py-3 justify-center items-center flex-row gap-2"
-            >
-              {uploadMutation.isPending ? (
-                <>
-                  <ActivityIndicator size="small" color="#fff" />
-                  <Text className="text-white font-semibold">
-                    Procesando y Subiendo...
-                  </Text>
-                </>
-              ) : (
-                <>
-                  <Feather name="send" size={18} color="#fff" />
-                  <Text className="text-white font-semibold">
-                    Cargar al Proyecto
-                  </Text>
-                </>
-              )}
-            </TouchableOpacity>
-          )}
-
-          {/* Uploaded Documents List */}
-          <View className="mt-8 mb-6">
-            <View className="flex-row justify-between items-center mb-4">
-              <Text className="text-white font-bold text-base">
-                Documentos del Proyecto
-              </Text>
-              {uploadedDocs.length > 0 && (
-                <TouchableOpacity onPress={handleClearDocsList}>
-                  <Text className="text-slate-400 text-xs font-semibold">
-                    Limpiar lista
-                  </Text>
-                </TouchableOpacity>
-              )}
-            </View>
-
-            {uploadedDocs.length === 0 ? (
-              <View className="py-8 justify-center items-center bg-slate-800/10 rounded-xl border border-slate-800">
-                <Feather name="folder" size={32} color="#475569" />
-                <Text className="text-slate-500 text-sm mt-2">
-                  No hay documentos indexados
+              {selectedFile && (
+                <Text style={{ color: colors.mutedForeground, fontSize: 12 }}>
+                  {formatBytes(selectedFile.size || 0)}
                 </Text>
-              </View>
-            ) : (
-              uploadedDocs.map((doc) => (
-                <View
-                  key={doc.id}
-                  className="flex-row items-center justify-between p-3.5 bg-slate-800/40 rounded-xl mb-2.5 border border-slate-800"
+              )}
+            </TouchableOpacity>
+
+            {/* Actions */}
+            {selectedFile && (
+              <View style={{ flexDirection: "row", gap: 12 }}>
+                <Button
+                  variant="outline"
+                  onPress={() => setSelectedFile(null)}
+                  style={{ flex: 1, borderColor: colors.border }}
+                  disabled={uploadMutation.isPending}
                 >
-                  <View className="flex-row items-center flex-1 mr-3">
-                    <Feather
-                      name="file"
-                      size={18}
-                      color="#94a3b8"
-                      className="mr-2.5"
-                    />
-                    <View className="flex-1">
-                      <Text
-                        className="text-slate-200 text-sm font-medium"
-                        numberOfLines={1}
-                      >
-                        {doc.name}
-                      </Text>
-                      <Text className="text-slate-500 text-xs mt-0.5">
-                        {formatBytes(doc.size)} • {doc.timestamp}
-                      </Text>
-                    </View>
-                  </View>
-                  <View className="flex-row items-center gap-2">
-                    <View className="px-2 py-0.5 bg-emerald-950 rounded-full border border-emerald-900">
-                      <Text className="text-emerald-400 text-[10px] font-semibold">
-                        Aislado
-                      </Text>
-                    </View>
-                    <TouchableOpacity
-                      onPress={() => handleDeleteDoc(doc.id, doc.name)}
-                      className="p-1.5 rounded-lg bg-slate-800 border border-slate-700/60"
+                  <Text style={{ color: colors.foreground }}>Cancelar</Text>
+                </Button>
+                <Button
+                  onPress={handleUploadDocument}
+                  style={{ flex: 1, backgroundColor: colors.primary }}
+                  disabled={uploadMutation.isPending}
+                >
+                  {uploadMutation.isPending ? (
+                    <ActivityIndicator size="small" color={colors.primaryForeground} />
+                  ) : (
+                    <Text style={{ color: colors.primaryForeground }}>Indexar</Text>
+                  )}
+                </Button>
+              </View>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Documents List */}
+        <View style={{ gap: 12 }}>
+          <Text style={{ fontSize: 16, fontWeight: "bold", color: colors.foreground, marginLeft: 4 }}>
+            Documentos Indexados ({uploadedDocs.length})
+          </Text>
+
+          {uploadedDocs.length === 0 ? (
+            <Card style={{ backgroundColor: colors.card, borderColor: colors.border }}>
+              <CardContent style={{ alignItems: "center", paddingVertical: 32, gap: 8 }}>
+                <Icon as={Info} size={24} style={{ color: colors.mutedForeground }} />
+                <Text style={{ color: colors.mutedForeground, textAlign: "center" }}>
+                  Aún no has agregado ningún documento en este cuaderno.
+                </Text>
+              </CardContent>
+            </Card>
+          ) : (
+            uploadedDocs.map((doc) => (
+              <View
+                key={doc.id}
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  padding: 16,
+                  borderRadius: 8,
+                  backgroundColor: colors.card,
+                  borderColor: colors.border,
+                  borderWidth: 1,
+                }}
+              >
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 12, flex: 1 }}>
+                  <Icon as={FileText} style={{ color: colors.mutedForeground }} />
+                  <View style={{ flex: 1 }}>
+                    <Text
+                      numberOfLines={1}
+                      style={{ color: colors.foreground, fontWeight: "500" }}
                     >
-                      <Feather name="trash-2" size={14} color="#f87171" />
-                    </TouchableOpacity>
+                      {doc.name}
+                    </Text>
+                    <Text style={{ color: colors.mutedForeground, fontSize: 12 }}>
+                      {formatBytes(doc.size)} • {doc.timestamp}
+                    </Text>
                   </View>
                 </View>
-              ))
-            )}
-          </View>
-        </ScrollView>
-      </View>
+
+                <TouchableOpacity
+                  onPress={() => handleDeleteDoc(doc.id, doc.name)}
+                  style={{ padding: 8 }}
+                  disabled={deleteMutation.isPending}
+                >
+                  <Icon as={Trash2} size={18} style={{ color: "#ef4444" }} />
+                </TouchableOpacity>
+              </View>
+            ))
+          )}
+        </View>
+      </ScrollView>
+    </View>
   );
 }

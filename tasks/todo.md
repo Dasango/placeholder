@@ -1,56 +1,52 @@
 # Lista de Tareas: Local Document RAG con Soporte de Proyectos
 
-## Fase 1: Actualización del Backend (n8n Webhook y PGVector)
-- [x] **Tarea 1**: Configurar Ingesta con Metadatos por Proyecto en n8n
+## Fase 1: Implementación de la Pantalla Principal (Lista de Proyectos)
+- [x] **Tarea 1**: Desarrollar Vista de Inicio (`app/app/index.tsx`)
   - *Criterios de Aceptación*:
-    - Webhook `/upload-pdf` recibe `projectId`.
-    - Nodo de inserción PGVector guarda `project_id` en metadatos del chunk.
-- [x] **Tarea 2**: Configurar Filtro de Proyecto en el Agente de Chat de n8n
-  - *Criterios de Aceptación*:
-    - Webhook `/chat` recibe `projectId` en JSON.
-    - Herramienta `Query Data Tool` (PGVector) tiene filtro `project_id = {{ $json.body.projectId }}`.
-
-### Checkpoint: Backend n8n
-- [x] Validar importación de JSON o edición de nodos.
-- [x] Probar endpoint con archivos cargados a dos proyectos distintos y corroborar metadatos en la base PostgreSQL.
-
----
-
-## Fase 2: Rediseño de Navegación y Pantalla Principal
-- [x] **Tarea 3**: Refactorización del Esquema de Estado y Almacenamiento Local
-  - *Criterios de Aceptación*:
-    - Interfaces TS creadas para `Project`, `UploadedDocument`, `ChatMessage` con aislamiento por proyecto.
-    - Funciones de almacenamiento en `AsyncStorage` actualizadas para usar claves específicas por proyecto.
-- [x] **Tarea 4**: Implementar Pantalla de Lista de Proyectos (`app/app/index.tsx`)
-  - *Criterios de Aceptación*:
-    - Pantalla de inicio muestra listado de proyectos y modal para crear nuevos proyectos.
-    - Guarda proyectos creados en AsyncStorage (`@rag_projects`).
-    - Al presionar un proyecto se navega a `/project/[id]` usando Expo Router `router.push()`.
+    - Muestra un listado de proyectos con tarjeta/tarjetas que indiquen su nombre y fecha de creación.
+    - Implementa un botón para crear un nuevo proyecto abriendo un modal o formulario integrado que solicite el nombre.
+    - Al hacer clic en un proyecto, navega a `/project/[id]` pasando el ID del proyecto.
+    - Incluye una sección o botón para editar/configurar la URL de n8n, guardándola localmente de manera persistente (o mostrando la URL en uso).
+    - Soporta el tema claro (fondo blanco, textos oscuros) y oscuro (fondo gris oscuro, textos claros).
+  - *Verificación*:
+    - Compilar la app, abrir el inicio, verificar que se muestra la lista y se puede añadir un proyecto, y cambiar el tema claro/oscuro en el simulador/dispositivo.
 
 ### Checkpoint: Pantalla de Proyectos
-- [x] Ejecutar la aplicación en modo desarrollo.
-- [x] Crear un proyecto "Test A" y otro "Test B".
-- [x] Verificar que aparecen en la lista y persisten después de recargar la aplicación.
+- [x] Proyectos se listan y se crean correctamente.
+- [x] Persistencia de datos al reiniciar la app.
 
 ---
 
-## Fase 3: Detalle del Proyecto (Documentos y Chat)
-- [x] **Tarea 5**: Crear Pantalla de Detalle de Proyecto (`app/app/project/[id].tsx`)
+## Fase 2: Implementación de Gestión de Documentos por Proyecto
+- [x] **Tarea 2**: Desarrollar la Pantalla de Documentos (`app/app/project/[id]/index.tsx`)
   - *Criterios de Aceptación*:
-    - Estructura básica creada usando `useLocalSearchParams` de `expo-router`.
-    - Cabecera funcional con botón de regreso a la pantalla principal.
-    - Barra de navegación de pestañas internas ("Documentos" y "Chat") usando control de estados de React.
-- [x] **Tarea 6**: Implementar Ingesta y Vista de Documentos por Proyecto
+    - Muestra el listado de documentos asignados al proyecto actual.
+    - Muestra un botón para elegir un documento (PDF/CSV) y permite ver el nombre del archivo seleccionado antes de subirlo.
+    - Botón de carga ("Ingestar Documento") con indicador de carga (`ActivityIndicator`) mientras la mutación se ejecuta.
+    - Opción de eliminar un documento individual, la cual realiza la llamada a `/webhook/delete-document` y actualiza la lista localmente.
+    - Los colores e iconos se adaptan correctamente al tema activo (claro/oscuro).
+  - *Verificación*:
+    - Cargar un archivo en un proyecto y confirmar que aparece en la lista de documentos.
+
+### Checkpoint: Gestión de Documentos
+- [x] Subida de archivos y eliminación de documentos funcionales.
+- [x] Los datos se guardan y reflejan de manera aislada para cada proyecto.
+
+---
+
+## Fase 3: Chat RAG Conversacional por Proyecto
+- [x] **Tarea 3**: Desarrollar la Interfaz de Chat (`app/app/project/[id]/chat.tsx`)
   - *Criterios de Aceptación*:
-    - Vista de Documentos muestra solo archivos del proyecto actual (`projectId`).
-    - Envía el archivo PDF/CSV junto con `projectId` en la llamada multipart/form-data.
-- [x] **Tarea 7**: Implementar Chat Aislado por Proyecto
-  - *Criterios de Aceptación*:
-    - Chat carga el historial específico del proyecto.
-    - Envía `{ message, projectId }` en la petición al backend de n8n.
+    - Carga el historial de conversación específico del proyecto desde la tienda de Zustand.
+    - Muestra burbujas de chat legibles que se ajustan al tema del dispositivo:
+      - Usuario: Fondo azul o gris destacado, texto claro.
+      - Asistente: Fondo sutil gris claro (en tema claro) o gris medio (en tema oscuro), texto según contraste.
+    - Muestra un indicador de carga animado cuando el bot está procesando la respuesta.
+    - El teclado se desplaza de manera óptima en iOS y Android (`KeyboardAvoidingView`).
+    - Permite limpiar el historial de chat con confirmación previa.
+  - *Verificación*:
+    - Enviar mensajes al chat, recibir respuestas del agente RAG de n8n, y borrar el historial de chat.
 
 ### Checkpoint Final
-- [x] La aplicación compila sin errores.
-- [x] Subir un PDF de prueba en el Proyecto A.
-- [x] Preguntar algo del PDF en el Proyecto A: debe responder correctamente con contexto.
-- [x] Ir al Proyecto B (sin PDFs subidos): el chat no debe saber nada sobre la información del PDF del Proyecto A.
+- [x] Chat funcional y con aislamiento de proyecto.
+- [x] Estilo visual adaptado a temas claros (blancos) y oscuros (grises).
