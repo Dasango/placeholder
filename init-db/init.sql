@@ -1,13 +1,14 @@
 -- Enable pgvector extension
 CREATE EXTENSION IF NOT EXISTS vector;
 
--- Create table for n8n vectors (dimension 1024 for BAAI bge-m3 on NVIDIA Build)
+-- n8n_vectors stores the chunked documents with their embeddings.
+-- Dimension 768 matches the nomic-embed-text model used by the RAG workflow.
 CREATE TABLE IF NOT EXISTS n8n_vectors (
   id BIGSERIAL PRIMARY KEY,
   content TEXT,
   metadata JSONB,
-  embedding VECTOR(1024) -- 1024 is the dimension of baai/bge-m3
+  embedding VECTOR(768)
 );
 
--- Create HNSW index for performance on similarity searches
+-- HNSW index for fast cosine similarity searches
 CREATE INDEX IF NOT EXISTS n8n_vectors_embedding_idx ON n8n_vectors USING hnsw (embedding vector_cosine_ops);

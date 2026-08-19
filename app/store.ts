@@ -27,7 +27,6 @@ interface AppState {
   documentsByProject: Record<string, UploadedDocument[]>;
   chatsByProject: Record<string, ChatMessage[]>;
 
-  // Actions
   addProject: (project: Project) => void;
   deleteProject: (projectId: string) => void;
   setDocuments: (projectId: string, docs: UploadedDocument[]) => void;

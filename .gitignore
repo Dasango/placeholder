@@ -38,6 +38,3 @@ yarn-error.*
 # Generated native folders (specific to app)
 /app/ios/
 /app/android/
-
-#Cladu
-/tasks

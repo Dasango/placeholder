@@ -4,23 +4,18 @@ import { useDeleteProjectFiles } from "../services/queries";
 import { useConnection } from "../contexts/ConnectionContext";
 
 export function useProjects() {
-  // Zustand State
   const projects = useAppStore((state) => state.projects);
   const addProject = useAppStore((state) => state.addProject);
   const deleteProject = useAppStore((state) => state.deleteProject);
 
-  // Global Connection Context
   const { isOnline } = useConnection();
   const isBackendOnline = isOnline;
 
-  // React Query Mutation to delete files in postgres/n8n
   const deleteProjectFilesMutation = useDeleteProjectFiles();
 
-  // Confirmation dialog state
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState<{ id: string; name: string } | null>(null);
 
-  // Alert dialog state
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [alertInfo, setAlertInfo] = useState({ title: "", description: "" });
 
@@ -70,10 +65,8 @@ export function useProjects() {
     if (!projectToDelete) return;
     const { id: projectId } = projectToDelete;
 
-    // 1. Delete locally in Zustand
     deleteProject(projectId);
 
-    // 2. Delete database vector files in n8n (Only executes if online!)
     deleteProjectFilesMutation.mutate(projectId, {
       onError: (err) => {
         console.warn("Could not delete project files from backend:", err);

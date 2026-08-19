@@ -18,7 +18,6 @@ export default function ProjectLayout() {
 
   return (
     <SafeAreaView className="flex-1 bg-white dark:bg-zinc-950">
-      {/* Shared Header with Back Button */}
       <View className="flex-row items-center px-5 py-4 border-b border-zinc-200 dark:border-zinc-850 bg-white dark:bg-zinc-950">
         <TouchableOpacity
           onPress={() => router.replace("/")}

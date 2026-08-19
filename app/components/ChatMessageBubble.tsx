@@ -18,14 +18,12 @@ export function ChatMessageBubble({ message }: ChatMessageBubbleProps) {
         isUser ? "justify-end" : "justify-start"
       } items-start w-full`}
     >
-      {/* Bot Icon */}
       {!isUser && (
         <View className="p-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700">
           <Icon as={Bot} className="text-zinc-600 dark:text-zinc-300 size-4" />
         </View>
       )}
 
-      {/* Message Content Bubble */}
       <View
         className={`max-w-[80%] px-4 py-3 rounded-2xl ${
           isUser
@@ -53,7 +51,6 @@ export function ChatMessageBubble({ message }: ChatMessageBubbleProps) {
         </Text>
       </View>
 
-      {/* User Icon */}
       {isUser && (
         <View className="p-1.5 rounded-full bg-zinc-900 dark:bg-zinc-100">
           <Icon as={User} className="text-white dark:text-zinc-950 size-4" />

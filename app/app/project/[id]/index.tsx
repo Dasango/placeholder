@@ -3,13 +3,11 @@ import { View, ScrollView } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { useProjectDocuments } from "../../../hooks/useProjectDocuments";
 
-// Compound Components & Modals
 import { DocumentPickerCard } from "../../../components/DocumentPickerCard";
 import { DocumentListItem } from "../../../components/DocumentListItem";
 import { ConfirmationDialog } from "../../../components/ConfirmationDialog";
 import { AlertDialog } from "../../../components/AlertDialog";
 
-// UI Primitives
 import { Card, CardContent } from "@/components/ui/card";
 import { Icon } from "@/components/ui/icon";
 import { Text } from "@/components/ui/text";
@@ -18,7 +16,6 @@ import { Info } from "lucide-react-native";
 export default function DocumentsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
 
-  // Business logic hook (No Zustand/queries inside app/app/)
   const {
     uploadedDocs,
     isBackendOnline,
@@ -39,7 +36,6 @@ export default function DocumentsScreen() {
         contentContainerClassName="p-5 gap-5"
         showsVerticalScrollIndicator={false}
       >
-        {/* Offline Warning Banner */}
         {!isBackendOnline && (
           <View className="p-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 rounded-lg flex-row items-center gap-2">
             <Text className="text-amber-700 dark:text-amber-450 text-xs font-semibold">
@@ -48,14 +44,12 @@ export default function DocumentsScreen() {
           </View>
         )}
 
-        {/* Compound Card for picking and uploading files */}
         <DocumentPickerCard
           projectId={id || ""}
           isConnected={isBackendOnline}
           onSuccess={handleUploadSuccess}
         />
 
-        {/* Document Listing */}
         <View className="gap-3">
           <Text className="text-zinc-900 dark:text-zinc-50 font-bold text-base pl-1">
             Documentos Indexados ({uploadedDocs.length})
@@ -83,7 +77,6 @@ export default function DocumentsScreen() {
         </View>
       </ScrollView>
 
-      {/* Confirmation Dialog for deleting document */}
       <ConfirmationDialog
         open={isConfirmOpen}
         onOpenChange={setIsConfirmOpen}
@@ -94,7 +87,6 @@ export default function DocumentsScreen() {
         variant="destructive"
       />
 
-      {/* Reusable Alert Dialog */}
       <AlertDialog
         open={isAlertOpen}
         onOpenChange={setIsAlertOpen}

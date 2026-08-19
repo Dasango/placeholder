@@ -25,8 +25,8 @@ async function runTests() {
   console.log(`Proyecto 1 (Delegación): ${projectId1}`);
   console.log(`Proyecto 2 (Reporte): ${projectId2}`);
 
-  const cartaPath = path.join(__dirname, '../tasks/carta_delegacion.pdf');
-  const reportePath = path.join(__dirname, '../tasks/REPORTE DE RESULTADOS FINALES.pdf');
+  const cartaPath = path.join(__dirname, 'fixtures/carta_delegacion.pdf');
+  const reportePath = path.join(__dirname, 'fixtures/REPORTE DE RESULTADOS FINALES.pdf');
 
   // Helper para subir archivos
   async function uploadFile(filePath, projectId, customName) {

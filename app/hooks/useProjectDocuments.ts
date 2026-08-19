@@ -4,23 +4,18 @@ import { useDeleteDocument } from "../services/queries";
 import { useConnection } from "../contexts/ConnectionContext";
 
 export function useProjectDocuments(projectId: string | undefined) {
-  // Zustand State Management
   const documentsByProject = useAppStore((state) => state.documentsByProject);
   const setDocuments = useAppStore((state) => state.setDocuments);
   const uploadedDocs = (projectId ? documentsByProject[projectId] : []) || [];
 
-  // Global Connection Context
   const { isOnline } = useConnection();
   const isBackendOnline = isOnline;
 
-  // React Query Mutation to delete single document in backend
   const deleteMutation = useDeleteDocument();
 
-  // Confirmation dialog state
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [docToDelete, setDocToDelete] = useState<{ id: string; name: string } | null>(null);
 
-  // Alert dialog state
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [alertInfo, setAlertInfo] = useState({ title: "", description: "" });
 

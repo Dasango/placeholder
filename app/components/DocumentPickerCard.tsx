@@ -97,7 +97,6 @@ export function DocumentPickerCard({ projectId, isConnected, onSuccess }: Docume
         </CardDescription>
       </CardHeader>
       <CardContent className="gap-4">
-        {/* File Selector */}
         <TouchableOpacity
           onPress={handleSelectDocument}
           disabled={!isConnected || uploadMutation.isPending}
@@ -117,7 +116,6 @@ export function DocumentPickerCard({ projectId, isConnected, onSuccess }: Docume
           )}
         </TouchableOpacity>
 
-        {/* Local Feedback Status Message */}
         {status && (
           <View
             className={`p-3 rounded-lg border ${
@@ -138,7 +136,6 @@ export function DocumentPickerCard({ projectId, isConnected, onSuccess }: Docume
           </View>
         )}
 
-        {/* Actions */}
         {selectedFile && isConnected && (
           <View className="flex-row gap-3">
             <Button

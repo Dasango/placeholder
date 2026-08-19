@@ -3,14 +3,12 @@ import { View, ScrollView, ActivityIndicator, KeyboardAvoidingView, Platform } f
 import { useLocalSearchParams } from "expo-router";
 import { useProjectChat } from "../../../hooks/useProjectChat";
 
-// Compound Components & Modals
 import { ChatToolbar } from "../../../components/ChatToolbar";
 import { ChatMessageBubble } from "../../../components/ChatMessageBubble";
 import { ChatInputBar } from "../../../components/ChatInputBar";
 import { ConfirmationDialog } from "../../../components/ConfirmationDialog";
 import { AlertDialog } from "../../../components/AlertDialog";
 
-// UI Primitives
 import { Icon } from "@/components/ui/icon";
 import { Text } from "@/components/ui/text";
 import { Bot } from "lucide-react-native";
@@ -18,7 +16,6 @@ import { Bot } from "lucide-react-native";
 export default function ChatScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
 
-  // Business logic hook (No Zustand/queries inside app/app/)
   const {
     chatHistory,
     isBackendOnline,
@@ -48,7 +45,6 @@ export default function ChatScreen() {
       className="flex-1 bg-white dark:bg-zinc-950"
     >
       <View className="flex-1">
-        {/* Toolbar to clear chat history */}
         {chatHistory.length > 0 && (
           <ChatToolbar
             onClear={handleClearPress}
@@ -56,7 +52,6 @@ export default function ChatScreen() {
           />
         )}
 
-        {/* Scrollable messages history list */}
         <ScrollView
           ref={chatScrollRef}
           className="flex-1"
@@ -80,7 +75,6 @@ export default function ChatScreen() {
             ))
           )}
 
-          {/* AI Thinking indicator */}
           {sending && (
             <View className="flex-row items-center gap-3 pl-1 py-2">
               <ActivityIndicator size="small" color="#71717a" />
@@ -91,7 +85,6 @@ export default function ChatScreen() {
           )}
         </ScrollView>
 
-        {/* Input Bar */}
         <ChatInputBar
           onSend={handleSendMessage}
           disabled={sending}
@@ -99,7 +92,6 @@ export default function ChatScreen() {
         />
       </View>
 
-      {/* Confirmation Dialog for clearing chat logs */}
       <ConfirmationDialog
         open={isConfirmOpen}
         onOpenChange={setIsConfirmOpen}
@@ -110,7 +102,6 @@ export default function ChatScreen() {
         variant="destructive"
       />
 
-      {/* Reusable Alert Dialog */}
       <AlertDialog
         open={isAlertOpen}
         onOpenChange={setIsAlertOpen}

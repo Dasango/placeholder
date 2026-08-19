@@ -4,22 +4,17 @@ import { useSendChatMessage } from "../services/queries";
 import { useConnection } from "../contexts/ConnectionContext";
 
 export function useProjectChat(projectId: string | undefined) {
-  // Zustand State Management
   const chatsByProject = useAppStore((state) => state.chatsByProject);
   const setChats = useAppStore((state) => state.setChats);
   const chatHistory = (projectId ? chatsByProject[projectId] : []) || [];
 
-  // Global Connection Context
   const { isOnline } = useConnection();
   const isBackendOnline = isOnline;
 
-  // React Query Mutation to send chat message
   const chatMutation = useSendChatMessage();
 
-  // Confirmation dialog state
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
-  // Alert dialog state
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [alertInfo, setAlertInfo] = useState({ title: "", description: "" });
 
@@ -39,7 +34,6 @@ export function useProjectChat(projectId: string | undefined) {
 
     if (!projectId) return;
 
-    // 1. Add user message locally
     const userMsg: ChatMessage = {
       id: Math.random().toString(36).substring(2, 11),
       role: "user",
@@ -53,7 +47,6 @@ export function useProjectChat(projectId: string | undefined) {
     const newHistory = [...chatHistory, userMsg];
     setChats(projectId, newHistory);
 
-    // 2. Query RAG agent backend (Only executes if online)
     chatMutation.mutate(
       { message: text, projectId },
       {
