@@ -18,7 +18,7 @@ export default function ProjectLayout() {
 
   return (
     <SafeAreaView className="flex-1 bg-white dark:bg-zinc-950">
-      <View className="flex-row items-center px-5 py-4 border-b border-zinc-200 dark:border-zinc-850 bg-white dark:bg-zinc-950">
+      <View className="flex-row items-center px-5 py-4 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
         <TouchableOpacity
           onPress={() => router.replace("/")}
           className="mr-4 p-1 rounded-full active:bg-zinc-100 dark:active:bg-zinc-800"

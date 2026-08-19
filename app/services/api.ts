@@ -51,7 +51,16 @@ export async function getProjectsApi(): Promise<BackendProject[]> {
   }
 
   const data = await response.json();
-  const rows = Array.isArray(data) ? data : data?.projects ?? [];
+  let rows: any[] = [];
+  if (Array.isArray(data)) {
+    rows = data;
+  } else if (data && typeof data === "object") {
+    if (data.id) {
+      rows = [data];
+    } else if (Array.isArray(data.projects)) {
+      rows = data.projects;
+    }
+  }
 
   return rows.map((row: Record<string, unknown>) => ({
     id: String(row.id ?? ""),
@@ -63,16 +72,20 @@ export async function getProjectsApi(): Promise<BackendProject[]> {
 
 function parseDocuments(raw: unknown): string[] {
   if (!raw) return [];
-  if (Array.isArray(raw)) return raw.map(String);
-  if (typeof raw === "string") {
+  let list: any[] = [];
+  if (Array.isArray(raw)) {
+    list = raw;
+  } else if (typeof raw === "string") {
     try {
       const parsed = JSON.parse(raw);
-      return Array.isArray(parsed) ? parsed.map(String) : [];
-    } catch {
-      return [];
-    }
+      if (Array.isArray(parsed)) {
+        list = parsed;
+      }
+    } catch {}
   }
-  return [];
+  return list
+    .map(String)
+    .filter(val => val && val !== "null" && val.trim() !== "");
 }
 
 /**

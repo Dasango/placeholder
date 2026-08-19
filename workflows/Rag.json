@@ -5,6 +5,7 @@
       "parameters": {
         "httpMethod": "POST",
         "path": "upload-pdf",
+        "responseMode": "lastNode",
         "options": {}
       },
       "id": "8c5813c3-76b0-4c00-bec9-d647ca52c913",
@@ -274,7 +275,7 @@
     {
       "parameters": {
         "content": "Delete Flow",
-        "height": 300,
+        "height": 844,
         "width": 472,
         "color": 7
       },
@@ -289,9 +290,9 @@
     },
     {
       "parameters": {
-        "additionalFields": null,
         "operation": "executeQuery",
-        "query": "DELETE FROM n8n_vectors WHERE metadata->>'project_id' = '{{ $json.body.projectId }}';"
+        "query": "DELETE FROM n8n_vectors WHERE metadata->>'project_id' = '{{ $json.body.projectId }}';",
+        "options": {}
       },
       "id": "3f4278ea-4b20-425e-a00c-9a10ab57c78d",
       "name": "Execute a SQL query",
@@ -300,13 +301,13 @@
         752,
         592
       ],
+      "typeVersion": 2.6,
       "credentials": {
         "postgres": {
           "id": "4qxHiAVYzK1kbOQR",
           "name": "Postgres account"
         }
-      },
-      "typeVersion": 2.6
+      }
     },
     {
       "parameters": {
@@ -319,8 +320,8 @@
       "name": "Sticky Note6",
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        480,
-        720
+        0,
+        768
       ],
       "typeVersion": 1
     },
@@ -335,7 +336,7 @@
       "type": "n8n-nodes-base.webhook",
       "position": [
         544,
-        800
+        784
       ],
       "webhookId": "361bc062-ba21-4fad-83b4-ca22b370b904",
       "typeVersion": 2.1
@@ -343,22 +344,23 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "DELETE FROM n8n_vectors WHERE metadata->>'project_id' = '{{ $json.body.projectId }}' AND metadata->>'file_name' = '{{ $json.body.documentName }}';"
+        "query": "DELETE FROM n8n_vectors WHERE metadata->>'project_id' = '{{ $json.body.projectId }}' AND metadata->>'file_name' = '{{ $json.body.documentName }}';",
+        "additionalFields": {}
       },
       "id": "005970e4-4004-4d53-bdc6-498530f3ce49",
       "name": "Delete single document from DB",
       "type": "n8n-nodes-base.postgres",
       "position": [
-        750,
-        800
+        752,
+        784
       ],
+      "typeVersion": 1,
       "credentials": {
         "postgres": {
           "id": "4qxHiAVYzK1kbOQR",
           "name": "Postgres account"
         }
-      },
-      "typeVersion": 1
+      }
     },
     {
       "parameters": {
@@ -371,15 +373,15 @@
       "name": "Sticky Note7",
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        480,
-        960
+        0,
+        1024
       ],
       "typeVersion": 1
     },
     {
       "parameters": {
-        "httpMethod": "GET",
         "path": "get-projects",
+        "responseMode": "lastNode",
         "options": {}
       },
       "id": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
@@ -387,7 +389,7 @@
       "type": "n8n-nodes-base.webhook",
       "position": [
         544,
-        1040
+        992
       ],
       "webhookId": "c3d4e5f6-a7b8-9012-cdef-123456789012",
       "typeVersion": 2.1
@@ -395,27 +397,29 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "CREATE TABLE IF NOT EXISTS rag_projects (\n  id TEXT PRIMARY KEY,\n  name TEXT NOT NULL,\n  created_at TIMESTAMPTZ DEFAULT NOW()\n);\n\nSELECT\n  p.id,\n  p.name,\n  to_char(p.created_at, 'YYYY-MM-DD') AS \"createdAt\",\n  COALESCE(\n    (\n      SELECT json_agg(DISTINCT sub.file_name)\n      FROM (\n        SELECT metadata->>'file_name' AS file_name\n        FROM n8n_vectors\n        WHERE metadata->>'project_id' = p.id\n          AND metadata->>'file_name' IS NOT NULL\n      ) sub\n    ),\n    '[]'::json\n  ) AS documents\nFROM rag_projects p\n\nUNION ALL\n\nSELECT\n  v.project_id AS id,\n  v.project_id AS name,\n  '' AS \"createdAt\",\n  json_agg(DISTINCT v.file_name) AS documents\nFROM (\n  SELECT DISTINCT\n    metadata->>'project_id' AS project_id,\n    metadata->>'file_name' AS file_name\n  FROM n8n_vectors\n  WHERE metadata->>'project_id' IS NOT NULL\n    AND metadata->>'file_name' IS NOT NULL\n) v\nWHERE NOT EXISTS (\n  SELECT 1 FROM rag_projects p WHERE p.id = v.project_id\n)\nGROUP BY v.project_id;"
+        "query": "CREATE TABLE IF NOT EXISTS rag_projects (\n  id TEXT PRIMARY KEY,\n  name TEXT NOT NULL,\n  created_at TIMESTAMPTZ DEFAULT NOW()\n);\n\nSELECT\n  p.id,\n  p.name,\n  to_char(p.created_at, 'YYYY-MM-DD') AS \"createdAt\",\n  COALESCE(\n    (\n      SELECT json_agg(DISTINCT sub.file_name)\n      FROM (\n        SELECT metadata->>'file_name' AS file_name\n        FROM n8n_vectors\n        WHERE metadata->>'project_id' = p.id\n          AND metadata->>'file_name' IS NOT NULL\n      ) sub\n    ),\n    '[]'::json\n  ) AS documents\nFROM rag_projects p\n\nUNION ALL\n\nSELECT\n  v.project_id AS id,\n  v.project_id AS name,\n  '' AS \"createdAt\",\n  json_agg(DISTINCT v.file_name) AS documents\nFROM (\n  SELECT DISTINCT\n    metadata->>'project_id' AS project_id,\n    metadata->>'file_name' AS file_name\n  FROM n8n_vectors\n  WHERE metadata->>'project_id' IS NOT NULL\n    AND metadata->>'file_name' IS NOT NULL\n) v\nWHERE NOT EXISTS (\n  SELECT 1 FROM rag_projects p WHERE p.id = v.project_id\n)\nGROUP BY v.project_id;",
+        "options": {}
       },
       "id": "f6a7b8c9-d0e1-2345-f012-456789012345",
       "name": "Get projects from DB",
       "type": "n8n-nodes-base.postgres",
       "position": [
         752,
-        1040
+        992
       ],
+      "typeVersion": 2.6,
       "credentials": {
         "postgres": {
           "id": "4qxHiAVYzK1kbOQR",
           "name": "Postgres account"
         }
-      },
-      "typeVersion": 2.6
+      }
     },
     {
       "parameters": {
         "httpMethod": "POST",
         "path": "create-project",
+        "responseMode": "lastNode",
         "options": {}
       },
       "id": "d4e5f6a7-b8c9-0123-def0-234567890123",
@@ -423,7 +427,7 @@
       "type": "n8n-nodes-base.webhook",
       "position": [
         544,
-        1200
+        1184
       ],
       "webhookId": "e5f6a7b8-c9d0-1234-ef01-345678901234",
       "typeVersion": 2.1
@@ -431,24 +435,26 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "CREATE TABLE IF NOT EXISTS rag_projects (\n  id TEXT PRIMARY KEY,\n  name TEXT NOT NULL,\n  created_at TIMESTAMPTZ DEFAULT NOW()\n);\nINSERT INTO rag_projects (id, name)\nVALUES ('{{ $json.body.projectId }}', '{{ $json.body.name }}')\nON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name\nRETURNING id, name, to_char(created_at, 'YYYY-MM-DD') AS \"createdAt\";"
+        "query": "CREATE TABLE IF NOT EXISTS rag_projects (\n  id TEXT PRIMARY KEY,\n  name TEXT NOT NULL,\n  created_at TIMESTAMPTZ DEFAULT NOW()\n);\nINSERT INTO rag_projects (id, name)\nVALUES ('{{ $json.body.projectId }}', '{{ $json.body.name }}')\nON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name\nRETURNING id, name, to_char(created_at, 'YYYY-MM-DD') AS \"createdAt\";",
+        "options": {}
       },
       "id": "a7b8c9d0-e1f2-3456-0123-567890123456",
       "name": "Create project in DB",
       "type": "n8n-nodes-base.postgres",
       "position": [
         752,
-        1200
+        1184
       ],
+      "typeVersion": 2.6,
       "credentials": {
         "postgres": {
           "id": "4qxHiAVYzK1kbOQR",
           "name": "Postgres account"
         }
-      },
-      "typeVersion": 2.6
+      }
     }
   ],
+  "pinData": {},
   "connections": {
     "Query Data Tool": {
       "ai_tool": [
@@ -566,14 +572,18 @@
       ]
     }
   },
+  "active": true,
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
     "availableInMCP": false
   },
+  "versionId": "8f52f275-a242-49ae-947d-60b4f94b0f11",
   "meta": {
-    "templateCredsSetupCompleted": true
+    "templateCredsSetupCompleted": true,
+    "instanceId": "923db07cd4c9ca6fb0f3c907af115c67f9c3a22ed9c310bab7739bb018b68fd7"
   },
   "nodeGroups": [],
-  "id": "dVZdFnMRXSh5yTJ2"
+  "id": "dVZdFnMRXSh5yTJ2",
+  "tags": []
 }

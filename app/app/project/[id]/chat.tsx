@@ -66,12 +66,12 @@ export default function ChatScreen() {
     }, 100);
   };
 
-  // Tab bar hides when keyboard opens; offset by safe-area bottom on iOS.
+  // Tab bar/system navigation bar offset when keyboard opens on iOS & Android (edge-to-edge).
   const bottomInset =
     Platform.OS === "ios"
       ? Math.max(0, keyboardHeight - insets.bottom)
       : Platform.OS === "android"
-        ? 0
+        ? keyboardHeight
         : 0;
 
   return (

@@ -28,7 +28,7 @@ export function ChatMessageBubble({ message }: ChatMessageBubbleProps) {
         className={`max-w-[80%] px-4 py-3 rounded-2xl ${
           isUser
             ? "bg-zinc-900 dark:bg-zinc-50 border-0 rounded-tr-sm"
-            : "bg-zinc-100 dark:bg-zinc-850 border border-zinc-200 dark:border-zinc-800 rounded-tl-sm"
+            : "bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-tl-sm"
         }`}
       >
         <Text
