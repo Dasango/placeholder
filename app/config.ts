@@ -14,6 +14,12 @@ const resolveN8nUrl = (): string => {
     return envUrl;
   }
 
+  // Web runs in the browser on the same machine as n8n — always use localhost.
+  // Using the LAN IP from hostUri breaks when n8n only binds to 127.0.0.1.
+  if (Platform.OS === "web") {
+    return "http://localhost:5678";
+  }
+
   const hostUri = Constants.expoConfig?.hostUri;
   if (hostUri) {
     const ip = hostUri.split(":")[0];

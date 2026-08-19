@@ -359,6 +359,94 @@
         }
       },
       "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "### Project Sync Flow\nRegisters and lists notebooks so they persist across devices.",
+        "height": 200,
+        "width": 380,
+        "color": 6
+      },
+      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      "name": "Sticky Note7",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        480,
+        960
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "get-projects",
+        "options": {}
+      },
+      "id": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+      "name": "Get projects webhook",
+      "type": "n8n-nodes-base.webhook",
+      "position": [
+        544,
+        1040
+      ],
+      "webhookId": "c3d4e5f6-a7b8-9012-cdef-123456789012",
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "CREATE TABLE IF NOT EXISTS rag_projects (\n  id TEXT PRIMARY KEY,\n  name TEXT NOT NULL,\n  created_at TIMESTAMPTZ DEFAULT NOW()\n);\n\nSELECT\n  p.id,\n  p.name,\n  to_char(p.created_at, 'YYYY-MM-DD') AS \"createdAt\",\n  COALESCE(\n    (\n      SELECT json_agg(DISTINCT sub.file_name)\n      FROM (\n        SELECT metadata->>'file_name' AS file_name\n        FROM n8n_vectors\n        WHERE metadata->>'project_id' = p.id\n          AND metadata->>'file_name' IS NOT NULL\n      ) sub\n    ),\n    '[]'::json\n  ) AS documents\nFROM rag_projects p\n\nUNION ALL\n\nSELECT\n  v.project_id AS id,\n  v.project_id AS name,\n  '' AS \"createdAt\",\n  json_agg(DISTINCT v.file_name) AS documents\nFROM (\n  SELECT DISTINCT\n    metadata->>'project_id' AS project_id,\n    metadata->>'file_name' AS file_name\n  FROM n8n_vectors\n  WHERE metadata->>'project_id' IS NOT NULL\n    AND metadata->>'file_name' IS NOT NULL\n) v\nWHERE NOT EXISTS (\n  SELECT 1 FROM rag_projects p WHERE p.id = v.project_id\n)\nGROUP BY v.project_id;"
+      },
+      "id": "f6a7b8c9-d0e1-2345-f012-456789012345",
+      "name": "Get projects from DB",
+      "type": "n8n-nodes-base.postgres",
+      "position": [
+        752,
+        1040
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "4qxHiAVYzK1kbOQR",
+          "name": "Postgres account"
+        }
+      },
+      "typeVersion": 2.6
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "create-project",
+        "options": {}
+      },
+      "id": "d4e5f6a7-b8c9-0123-def0-234567890123",
+      "name": "Create project webhook",
+      "type": "n8n-nodes-base.webhook",
+      "position": [
+        544,
+        1200
+      ],
+      "webhookId": "e5f6a7b8-c9d0-1234-ef01-345678901234",
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "CREATE TABLE IF NOT EXISTS rag_projects (\n  id TEXT PRIMARY KEY,\n  name TEXT NOT NULL,\n  created_at TIMESTAMPTZ DEFAULT NOW()\n);\nINSERT INTO rag_projects (id, name)\nVALUES ('{{ $json.body.projectId }}', '{{ $json.body.name }}')\nON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name\nRETURNING id, name, to_char(created_at, 'YYYY-MM-DD') AS \"createdAt\";"
+      },
+      "id": "a7b8c9d0-e1f2-3456-0123-567890123456",
+      "name": "Create project in DB",
+      "type": "n8n-nodes-base.postgres",
+      "position": [
+        752,
+        1200
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "4qxHiAVYzK1kbOQR",
+          "name": "Postgres account"
+        }
+      },
+      "typeVersion": 2.6
     }
   ],
   "connections": {
@@ -449,6 +537,28 @@
         [
           {
             "node": "Delete single document from DB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get projects webhook": {
+      "main": [
+        [
+          {
+            "node": "Get projects from DB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create project webhook": {
+      "main": [
+        [
+          {
+            "node": "Create project in DB",
             "type": "main",
             "index": 0
           }

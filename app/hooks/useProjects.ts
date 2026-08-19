@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAppStore, Project } from "../store";
-import { useDeleteProjectFiles } from "../services/queries";
+import { useCreateProject, useDeleteProjectFiles } from "../services/queries";
 import { useConnection } from "../contexts/ConnectionContext";
 
 export function useProjects() {
@@ -12,6 +12,7 @@ export function useProjects() {
   const isBackendOnline = isOnline;
 
   const deleteProjectFilesMutation = useDeleteProjectFiles();
+  const createProjectMutation = useCreateProject();
 
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState<{ id: string; name: string } | null>(null);
@@ -39,6 +40,15 @@ export function useProjects() {
       createdAt: new Date().toLocaleDateString(),
     };
     addProject(newProject);
+
+    createProjectMutation.mutate(
+      { projectId: newProject.id, name: newProject.name },
+      {
+        onError: (err) => {
+          console.warn("Could not register project in backend:", err);
+        },
+      }
+    );
   };
 
   const handleDeletePress = (projectId: string, projectName: string) => {

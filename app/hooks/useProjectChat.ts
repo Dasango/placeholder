@@ -32,7 +32,13 @@ export function useProjectChat(projectId: string | undefined) {
       return;
     }
 
-    if (!projectId) return;
+    if (!projectId) {
+      triggerAlert(
+        "Project Error",
+        "The project identifier is missing, so the message couldn't be sent. Go back and reopen the notebook."
+      );
+      return;
+    }
 
     const userMsg: ChatMessage = {
       id: Math.random().toString(36).substring(2, 11),

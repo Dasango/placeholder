@@ -1,6 +1,14 @@
-import React, { useRef } from "react";
-import { View, ScrollView, ActivityIndicator, KeyboardAvoidingView, Platform } from "react-native";
-import { useLocalSearchParams } from "expo-router";
+import React, { useEffect, useRef, useState } from "react";
+import {
+  View,
+  ScrollView,
+  ActivityIndicator,
+  Platform,
+  Keyboard,
+  KeyboardEvent,
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useGlobalSearchParams } from "expo-router";
 import { useProjectChat } from "../../../hooks/useProjectChat";
 
 import { ChatToolbar } from "../../../components/ChatToolbar";
@@ -14,7 +22,9 @@ import { Text } from "@/components/ui/text";
 import { Bot } from "lucide-react-native";
 
 export default function ChatScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id } = useGlobalSearchParams<{ id: string }>();
+  const insets = useSafeAreaInsets();
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
 
   const {
     chatHistory,
@@ -32,19 +42,41 @@ export default function ChatScreen() {
 
   const chatScrollRef = useRef<ScrollView>(null);
 
+  useEffect(() => {
+    const showEvent = Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
+    const hideEvent = Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
+
+    const onShow = (event: KeyboardEvent) => {
+      setKeyboardHeight(event.endCoordinates.height);
+    };
+    const onHide = () => setKeyboardHeight(0);
+
+    const showSub = Keyboard.addListener(showEvent, onShow);
+    const hideSub = Keyboard.addListener(hideEvent, onHide);
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
+
   const scrollToBottom = () => {
     setTimeout(() => {
       chatScrollRef.current?.scrollToEnd({ animated: true });
     }, 100);
   };
 
+  // Tab bar hides when keyboard opens; offset by safe-area bottom on iOS.
+  const bottomInset =
+    Platform.OS === "ios"
+      ? Math.max(0, keyboardHeight - insets.bottom)
+      : Platform.OS === "android"
+        ? 0
+        : 0;
+
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 110 : 0}
-      className="flex-1 bg-white dark:bg-zinc-950"
-    >
-      <View className="flex-1">
+    <View className="flex-1 bg-white dark:bg-zinc-950">
+      <View className="flex-1" style={{ paddingBottom: bottomInset }}>
         {chatHistory.length > 0 && (
           <ChatToolbar
             onClear={handleClearPress}
@@ -57,6 +89,7 @@ export default function ChatScreen() {
           className="flex-1"
           contentContainerClassName="p-4 gap-4 pb-6"
           onContentSizeChange={scrollToBottom}
+          keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
           {chatHistory.length === 0 ? (
@@ -66,7 +99,7 @@ export default function ChatScreen() {
                 Hello! Ask your questions
               </Text>
               <Text className="text-zinc-500 dark:text-zinc-400 text-center text-sm px-8">
-                Ask about the information contained in this notebook's indexed documents.
+                Ask about the information contained in this notebook&apos;s indexed documents.
               </Text>
             </View>
           ) : (
@@ -108,6 +141,6 @@ export default function ChatScreen() {
         title={alertInfo.title}
         description={alertInfo.description}
       />
-    </KeyboardAvoidingView>
+    </View>
   );
 }

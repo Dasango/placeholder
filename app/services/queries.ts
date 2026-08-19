@@ -5,6 +5,8 @@ import {
   deleteDocumentApi,
   deleteProjectApi,
   sendChatMessageApi,
+  createProjectApi,
+  getProjectsApi,
   FileData,
 } from "./api";
 
@@ -62,5 +64,27 @@ export function useSendChatMessage() {
   return useMutation({
     mutationFn: ({ message, projectId }: { message: string; projectId: string }) =>
       sendChatMessageApi(message, projectId),
+  });
+}
+
+/**
+ * Mutation hook to register a project in the backend.
+ */
+export function useCreateProject() {
+  return useMutation({
+    mutationFn: ({ projectId, name }: { projectId: string; name: string }) =>
+      createProjectApi(projectId, name),
+  });
+}
+
+/**
+ * Query hook to fetch all projects from the backend.
+ */
+export function useFetchProjects(enabled = true) {
+  return useQuery({
+    queryKey: ["projects"],
+    queryFn: getProjectsApi,
+    enabled,
+    staleTime: 30000,
   });
 }
